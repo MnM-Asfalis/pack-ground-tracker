@@ -1,5 +1,149 @@
-<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PACK Ground Investments - Client Inquiry & Invoicing Portal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Firebase App & Firestore SDKs (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .bg-crimson { background-color: #9f1239; }
+    .bg-crimson-dark { background-color: #881337; }
+    .text-crimson { color: #9f1239; }
+    .border-crimson { border-color: #9f1239; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
+    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-200 relative overflow-hidden">
+      <div class="h-2 bg-crimson absolute top-0 left-0 right-0"></div>
+      
+      <!-- LOGO -->
+      <div class="flex flex-col items-center mb-6 text-center">
+        <div class="w-24 h-24 rounded-full flex items-center justify-center mb-3 shadow-md border-2 border-slate-100 overflow-hidden bg-white">
+          <img src="Pack Ground Logo.jpeg" alt="PACK Ground Investments Logo" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/9f1239/ffffff?text=PGI'">
+        </div>
+        <h2 class="text-xl font-bold text-slate-900 tracking-tight">PACK GROUND</h2>
+        <p class="text-xs font-semibold tracking-widest text-crimson uppercase">INVESTMENTS</p>
+        <p class="text-xs text-slate-500 mt-1">Staff Portal & Client Inquiry Gateway</p>
+      </div>
+
+      <!-- STAFF LOGIN FORM -->
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Staff Email / Username</label>
+          <input type="text" id="loginEmail" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="e.g. admin@packground.co.zw">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+          <input type="password" id="loginPassword" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter password">
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow-md transition duration-200 text-sm flex items-center justify-center gap-2">
+          Staff Login to Dashboard
+        </button>
+      </form>
+
+      <!-- CLIENT INQUIRY BUTTON -->
+      <div class="mt-4 pt-4 border-t border-slate-100">
+        <button type="button" onclick="openClientForm()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs transition shadow flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Submit Customer Inquiry (Client Portal)
+        </button>
+      </div>
+
+      <!-- FOOTER & DEVELOPER ATTRIBUTION -->
+      <div class="mt-6 pt-4 border-t border-slate-100 text-center text-[11px] text-slate-500 space-y-1">
+        <p class="font-medium text-slate-600">46 Caledon Avenue, Hatfield, Harare</p>
+        <p>+263 242 586 658 // +263 718 864 757</p>
+        <p class="text-[10px] text-slate-400 font-semibold pt-2 border-t border-slate-100 mt-2">
+          Developed by Asfalis Group 2026 | Phone: +263 772 911 806
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUBLIC CLIENT INQUIRY MODAL -->
+  <div id="clientModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden">
+    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-200 relative overflow-hidden">
+      <div class="h-2 bg-crimson absolute top-0 left-0 right-0"></div>
+      
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-200 object-cover" onerror="this.src='https://placehold.co/100x100/9f1239/ffffff?text=PGI'">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 leading-tight">PACK GROUND INVESTMENTS</h3>
+            <p class="text-xs text-rose-700 font-medium">Customer Service Request Portal</p>
+          </div>
+        </div>
+        <button onclick="closeClientForm()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="publicInquiryForm" onsubmit="submitClientInquiry(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+          <input type="text" id="publicName" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter your full name">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone / WhatsApp Number *</label>
+          <input type="text" id="publicPhone" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="e.g. +263 77 123 4567">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type of Service / Product Required *</label>
+          <textarea id="publicDetails" rows="3" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Describe the service or product you are looking for..."></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow transition text-sm">
+          Submit Inquiry to PACK Ground
+        </button>
+      </form>
+
+      <div id="clientSuccessMsg" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-center">
+        <p class="text-emerald-800 font-semibold text-sm">Thank you! Your inquiry has been submitted successfully.</p>
+        <p class="text-xs text-emerald-600 mt-1">Our sales team at PACK Ground Investments will reach out to you shortly.</p>
+        <button onclick="closeClientForm()" class="mt-3 px-4 py-1.5 bg-emerald-700 text-white rounded-lg text-xs font-semibold">Done</button>
+      </div>
+
+      <div class="mt-6 pt-3 border-t border-slate-100 text-center text-[10px] text-slate-400 font-semibold">
+        Developed by Asfalis Group 2026 | Phone: +263 772 911 806
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <div id="appContent" class="flex-1 flex flex-col hidden">
+    <!-- TOP HEADER -->
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between shadow-md">
+      <div class="flex items-center gap-4">
+        <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-600 object-cover" onerror="this.src='https://placehold.co/100x100/9f1239/ffffff?text=PGI'">
+        <div>
+          <h1 class="text-lg font-bold text-white leading-tight">PACK GROUND INVESTMENTS</h1>
+          <p id="welcomeUserBanner" class="text-xs text-rose-400 font-medium mt-0.5">Welcome</p>
+        </div>
+      </div>
+
       <div class="flex items-center gap-3">
+        <!-- GRAPHICAL ANALYTICS DASHBOARD BUTTON -->
+        <button onclick="openAnalyticsModal()" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Visual Analytics
+        </button>
+
         <button id="userManagementBtn" onclick="openUserModal()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg border border-slate-600 transition">
           Users & Accounts
         </button>
@@ -134,14 +278,21 @@
         <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-700 pb-4 mb-4 gap-3">
             <div>
-              <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400">Create Metal Fabrication Quotation</h2>
-              <p class="text-xs text-slate-400">Link an existing inquiry or build a new quotation estimate.</p>
+              <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400">Create Custom Metal Fabrication Quotation</h2>
+              <p class="text-xs text-slate-400">Build custom or non-standard job estimates with flexible variables.</p>
             </div>
-            <div class="flex items-center gap-2 w-full md:w-auto">
-              <label class="text-xs text-slate-300 font-semibold">Import Inquiry:</label>
-              <select id="quoteInquirySelector" onchange="autoFillFromInquiry()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500">
-                <option value="">-- Select Inquiry --</option>
-              </select>
+            
+            <!-- CLIENT TYPE SELECTION MODE -->
+            <div class="flex items-center gap-3 bg-slate-900 p-2 rounded-lg border border-slate-700 text-xs">
+              <span class="font-bold text-slate-300">Client Type:</span>
+              <label class="flex items-center gap-1 text-slate-300 cursor-pointer">
+                <input type="radio" name="clientType" value="existing" checked onchange="toggleClientTypeMode()" class="text-rose-500">
+                Existing Inquiry
+              </label>
+              <label class="flex items-center gap-1 text-slate-300 cursor-pointer">
+                <input type="radio" name="clientType" value="new" onchange="toggleClientTypeMode()" class="text-rose-500">
+                New Client (+Auto Save)
+              </label>
             </div>
           </div>
 
@@ -151,44 +302,57 @@
                 <label class="block text-xs text-slate-400 mb-1">Quotation Ref #</label>
                 <input type="text" id="quoteRef" readonly class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs font-mono text-rose-400 font-bold">
               </div>
-              <div>
-                <label class="block text-xs text-slate-400 mb-1">Client Name *</label>
-                <input type="text" id="quoteClientName" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+
+              <!-- EXISTING CLIENT DROPDOWN -->
+              <div id="existingClientContainer">
+                <label class="block text-xs text-slate-400 mb-1">Select Existing Client / Inquiry *</label>
+                <select id="quoteInquirySelector" onchange="autoFillFromInquiry()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500">
+                  <option value="">-- Select Registered Client --</option>
+                </select>
               </div>
+
+              <!-- NEW CLIENT INPUTS (Dynamic) -->
+              <div id="newClientNameContainer" class="hidden">
+                <label class="block text-xs text-slate-400 mb-1">New Client Full Name *</label>
+                <input type="text" id="quoteClientName" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200" placeholder="e.g. John Moyo">
+              </div>
+
               <div>
-                <label class="block text-xs text-slate-400 mb-1">Phone / WhatsApp *</label>
+                <label class="block text-xs text-slate-400 mb-1">Phone / WhatsApp Number *</label>
                 <input type="text" id="quoteClientPhone" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
               </div>
+
               <div class="md:col-span-2">
-                <label class="block text-xs text-slate-400 mb-1">Fabrication Subject / Description *</label>
-                <input type="text" id="quoteSubject" placeholder="e.g. 4m Sliding Gate & Palisade Fencing" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+                <label class="block text-xs text-slate-400 mb-1">Custom Product / Service Scope Description *</label>
+                <input type="text" id="quoteSubject" placeholder="e.g. 4m Motorized Sliding Gate, Heavy Duty Hinges & Red Oxide Finish" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
               </div>
+
               <div>
                 <label class="block text-xs text-slate-400 mb-1">Quote Date</label>
                 <input type="date" id="quoteDate" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
               </div>
             </div>
 
-            <!-- METAL FABRICATION PRESETS -->
+            <!-- CUSTOM VARIABLE FABRICATION PRESETS -->
             <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex flex-wrap items-center gap-2">
-              <span class="text-xs font-bold text-slate-400 uppercase mr-1">Fabrication Presets:</span>
-              <button type="button" onclick="addQuoteRow('Mild Steel RHS Tubing (100x50x3mm)', '6m Length', 45)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Steel Tubing</button>
-              <button type="button" onclick="addQuoteRow('Structural MIG/TIG Welding Labor', 'Hours', 25)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Welding Labor</button>
-              <button type="button" onclick="addQuoteRow('Red Oxide Primer & Industrial Paint', 'Sq Meters', 12)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Paint Finish</button>
-              <button type="button" onclick="addQuoteRow('Heavy Duty Hinges & Gate Lock Assembly', 'Set', 35)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Lock Hardware</button>
-              <button type="button" onclick="addQuoteRow('On-Site Installation & Fitting (Harare)', 'Lot', 120)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Site Install</button>
+              <span class="text-xs font-bold text-slate-400 uppercase mr-1">Quick Custom Item Templates:</span>
+              <button type="button" onclick="addQuoteRow('Mild Steel RHS Tubing (Custom Size)', '6m Length', 45)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Custom Steel Section</button>
+              <button type="button" onclick="addQuoteRow('Structural MIG/TIG Welding Labor (Custom Scope)', 'Hours', 25)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Specialized Labor</button>
+              <button type="button" onclick="addQuoteRow('Red Oxide Primer & Custom Spray Coating', 'Sq Meters', 12)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Surface Coating</button>
+              <button type="button" onclick="addQuoteRow('Specialized Heavy Duty Hardware / Locks', 'Set', 35)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Custom Hardware</button>
+              <button type="button" onclick="addQuoteRow('Site Transport & Installation (Custom Site Location)', 'Lot', 120)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Transport & Installation</button>
             </div>
 
-            <!-- LINE ITEMS TABLE -->
+            <!-- LINE ITEMS TABLE WITH FULL EDITABLE VARIABLES -->
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs">
                 <thead class="bg-slate-900 text-slate-400 uppercase font-semibold border-b border-slate-700">
                   <tr>
-                    <th class="p-2.5 w-5/12">Item Description</th>
-                    <th class="p-2.5 w-2/12">Unit</th>
+                    <th class="p-2.5 w-5/12">Product / Service Description (Editable Variable)</th>
+                    <th class="p-2.5 w-2/12">Unit Type</th>
                     <th class="p-2.5 w-1/12 text-center">Qty</th>
                     <th class="p-2.5 w-2/12 text-right">Unit Price ($)</th>
-                    <th class="p-2.5 w-2/12 text-right">Total ($)</th>
+                    <th class="p-2.5 w-2/12 text-right">Line Total ($)</th>
                     <th class="p-2.5 w-1/12 text-center">Action</th>
                   </tr>
                 </thead>
@@ -197,8 +361,8 @@
             </div>
 
             <div class="flex flex-col md:flex-row justify-between items-start gap-4">
-              <button type="button" onclick="addQuoteRow()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg">
-                + Add Custom Row
+              <button type="button" onclick="addQuoteRow('', 'Job / Item', 0)" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg">
+                + Add Custom Variable Item Row
               </button>
 
               <div class="w-full md:w-72 bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-2 text-xs">
@@ -218,8 +382,8 @@
             </div>
 
             <div class="flex justify-end pt-2">
-              <button type="submit" class="px-6 py-2.5 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-sm shadow transition">
-                Save & Issue Quotation
+              <button type="submit" class="px-6 py-2.5 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-sm shadow transition flex items-center gap-2">
+                Save & Issue Custom Quotation
               </button>
             </div>
           </form>
@@ -274,9 +438,42 @@
     </main>
 
     <!-- DASHBOARD DEVELOPER FOOTER -->
-<!-- ... existing code ... -->
+    <footer class="bg-slate-900 py-3 text-center text-xs text-slate-500 border-t border-slate-800">
+      Developed by Asfalis Group 2026 | Phone: +263 772 911 806
+    </footer>
+  </div>
+
   <!-- USER MANAGEMENT MODAL -->
-<!-- ... existing code ... -->
+  <div id="userModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-800 text-slate-100 rounded-2xl shadow-2xl w-full max-w-2xl p-6 border border-slate-700 m-4">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-700">
+        <h3 class="text-lg font-bold text-white">Team User & Account Settings</h3>
+        <button onclick="closeUserModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <div class="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+        <!-- ADD NEW USER FORM -->
+        <form id="addUserForm" onsubmit="handleAddUser(event)" class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
+          <h4 class="text-xs font-bold text-rose-400 uppercase">Add New Team Account</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input type="text" id="newUserEmail" placeholder="Email / Username" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
+            <input type="password" id="newUserPassword" placeholder="Password" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
+            <select id="newUserRole" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
+              <option value="Staff">Staff</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full py-2 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-xs transition">Create Account</button>
+        </form>
+
+        <!-- REGISTERED ACCOUNTS LIST -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-400 uppercase">Registered Accounts & Credentials Management</h4>
+          <div id="userList" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- PRINT & PREVIEW DOCUMENT MODAL -->
   <div id="printDocModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden overflow-y-auto">
@@ -349,42 +546,61 @@
           </div>
         </div>
 
-        <div class="border-t border-slate-200 pt-4 text-[11px] text-slate-600 space-y-1">
-          <p class="font-bold text-slate-800">Standard Execution & Payment Terms:</p>
-          <p>• 50% deposit required upon order confirmation to initiate material procurement.</p>
-          <p>• 40% milestone payment upon completion of factory assembly prior to delivery.</p>
-          <p>• 10% balance due upon site installation and final sign-off.</p>
-          <p>• Banking Details: PACK Ground Investments | Standard Chartered / CBZ Bank Harare.</p>
-        </div>
-
-        <div class="mt-12 flex justify-between items-end text-xs pt-4 border-t border-dashed border-slate-300">
+        <div class="border-t border-slate-200 pt-6 text-[10px] text-slate-500 flex justify-between items-end">
           <div>
-            <p class="font-bold text-slate-800">Authorized Signature (PGI)</p>
-            <p class="text-slate-400 mt-8">_______________________________</p>
-            <p class="text-slate-600 mt-1">Elton Chitura - Director</p>
+            <p class="font-bold text-slate-700 uppercase">Payment Terms & Instructions:</p>
+            <p>1. 50% Upfront deposit to confirm order and commence shop fabrication.</p>
+            <p>2. 40% Payable upon completion of metalwork prior to dispatch.</p>
+            <p>3. 10% Final balance upon installation & client sign-off.</p>
           </div>
-          <div class="text-right">
-            <p class="font-bold text-slate-800">Client Acceptance Signature</p>
-            <p class="text-slate-400 mt-8">_______________________________</p>
-            <p class="text-slate-600 mt-1">Date: ____ / ____ / 2026</p>
+          <div class="text-center w-40 border-t border-slate-400 pt-1">
+            <p class="font-bold text-slate-800">Authorized Signature</p>
+            <p class="text-[9px] text-slate-400">PACK Ground Investments</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <style>
-    @media print {
-      body * { visibility: hidden; }
-      #printableDocument, #printableDocument * { visibility: visible; }
-      #printableDocument { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; }
-      .no-print { display: none !important; }
-    }
-  </style>
+  <!-- VISUAL ANALYTICS GRAPHICAL DASHBOARD MODAL -->
+  <div id="analyticsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden overflow-y-auto">
+    <div class="bg-slate-800 text-slate-100 rounded-2xl shadow-2xl w-full max-w-4xl p-6 border border-slate-700 m-4 space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+        <div>
+          <h3 class="text-lg font-bold text-white flex items-center gap-2">
+            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 30v-6m0 0l-3 3m3-3l3 3M3 12h18"/></svg>
+            PACK Ground Operations - Visual Analytics Dashboard
+          </h3>
+          <p class="text-xs text-slate-400">Graphical summary of multi-channel inquiries, quote conversions & revenue pipeline.</p>
+        </div>
+        <button onclick="closeAnalyticsModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- GRAPH 1: INQUIRY STATUS BREAKDOWN -->
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col items-center">
+          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3 text-center">Inquiry Pipeline Status</h4>
+          <div id="chartStatusContainer" class="w-full flex justify-center items-center h-48"></div>
+        </div>
+
+        <!-- GRAPH 2: INQUIRY SOURCE DISTRIBUTION -->
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col items-center">
+          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3 text-center">Inquiry Lead Sources</h4>
+          <div id="chartSourceContainer" class="w-full flex justify-center items-center h-48"></div>
+        </div>
+
+        <!-- GRAPH 3: FINANCIAL REVENUE SUMMARY -->
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col items-center">
+          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3 text-center">Quotations vs. Invoiced Revenue</h4>
+          <div id="chartFinancialContainer" class="w-full flex justify-center items-center h-48"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
     // ==========================================
-    // FIREBASE CLOUD CONFIGURATION & SAFEGUARD
+    // FIREBASE CLOUD CONFIGURATION
     // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyBwLjWo5yY4YRY5noKQZqhTiNLB8PYcTLo",
@@ -395,27 +611,37 @@
       appId: "1:199008755535:web:50b0064769705d254caf3a"
     };
 
-    let db;
+    // Global Variable Declarations
     let users = [];
     let inquiries = [];
     let quotations = [];
     let invoices = [];
     let currentUser = null;
+    let db = null;
 
-    // Initialize Firebase once DOM & scripts are fully loaded
-    window.addEventListener('DOMContentLoaded', () => {
-      if (typeof firebase !== 'undefined') {
+    // Safe Firebase Guard Initializer
+    function setupFirebaseApp() {
+      if (typeof firebase !== 'undefined' && firebase.apps) {
         if (!firebase.apps.length) {
           firebase.initializeApp(firebaseConfig);
         }
         db = firebase.firestore();
         initDatabase();
       } else {
-        console.error('Firebase SDK failed to load from CDN.');
+        setTimeout(setupFirebaseApp, 150);
       }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setupFirebaseApp();
+      // Set today's date defaults
+      const today = new Date().toISOString().split('T')[0];
+      if (document.getElementById('quoteDate')) document.getElementById('quoteDate').value = today;
+      if (document.getElementById('custFollowUp')) document.getElementById('custFollowUp').value = today;
+      generateQuoteRef();
     });
 
-    // Seed default admin accounts if database is empty, then load real-time data
+    // Seed default accounts if database is empty
     async function initDatabase() {
       if (!db) return;
       try {
@@ -432,20 +658,18 @@
           }
         }
         loadRealtimeData();
-        initQuoteForm();
-      } catch (err) {
-        console.error('Database initialization error:', err);
+      } catch (e) {
+        console.warn('Firebase connection notice:', e);
       }
     }
 
-    // Real-time synchronization listeners for live updates across phone & laptop
+    // Real-time synchronization listeners
     function loadRealtimeData() {
       if (!db) return;
+
       db.collection('users').onSnapshot(snapshot => {
         users = [];
-        snapshot.forEach(doc => {
-          users.push({ id: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => users.push({ id: doc.id, ...doc.data() }));
         if (document.getElementById('userModal') && !document.getElementById('userModal').classList.contains('hidden')) {
           renderUsers();
         }
@@ -453,32 +677,28 @@
 
       db.collection('inquiries').orderBy('id', 'desc').onSnapshot(snapshot => {
         inquiries = [];
-        snapshot.forEach(doc => {
-          inquiries.push({ docId: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => inquiries.push({ docId: doc.id, ...doc.data() }));
         renderTable();
         updateStats();
-        populateInquiryDropdown();
+        populateInquirySelector();
       });
 
       db.collection('quotations').onSnapshot(snapshot => {
         quotations = [];
-        snapshot.forEach(doc => {
-          quotations.push({ docId: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => quotations.push({ docId: doc.id, ...doc.data() }));
         renderQuotationsTable();
       });
 
       db.collection('invoices').onSnapshot(snapshot => {
         invoices = [];
-        snapshot.forEach(doc => {
-          invoices.push({ docId: doc.id, ...doc.data() });
-        });
+        snapshot.forEach(doc => invoices.push({ docId: doc.id, ...doc.data() }));
         renderInvoicesTable();
       });
     }
 
-    // Tab Switching Functionality
+    // ==========================================
+    // APP NAVIGATION & TAB SWITCHER
+    // ==========================================
     function switchAppTab(tabId) {
       document.querySelectorAll('.app-tab-page').forEach(page => page.classList.add('hidden'));
       document.querySelectorAll('.nav-tab-btn').forEach(btn => {
@@ -487,115 +707,338 @@
       });
 
       document.getElementById(tabId).classList.remove('hidden');
-      const activeBtn = document.getElementById('tabBtn-' + tabId);
-      activeBtn.classList.add('bg-crimson', 'text-white');
-      activeBtn.classList.remove('bg-slate-800', 'text-slate-400');
-    }
+      const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-800', 'text-slate-400');
+        activeBtn.classList.add('bg-crimson', 'text-white');
+      }
 
-    // --- QUOTATION BUILDER LOGIC ---
-    function initQuoteForm() {
-      document.getElementById('quoteRef').value = 'PGI-QT-' + Math.floor(1000 + Math.random() * 9000);
-      document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
-      const tbody = document.getElementById('quoteLineItemsBody');
-      if (tbody) {
-        tbody.innerHTML = '';
-        addQuoteRow();
+      if (tabId === 'quotationsTab' && document.getElementById('quoteLineItemsBody').children.length === 0) {
+        addQuoteRow('Mild Steel RHS Tubing (Custom Size)', '6m Length', 45);
+        addQuoteRow('Structural MIG/TIG Welding Labor', 'Hours', 25);
       }
     }
 
-    function populateInquiryDropdown() {
+    // ==========================================
+    // AUTHENTICATION & LOGIN
+    // ==========================================
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+
+      const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
+      
+      if (!found) {
+        alert('Invalid Staff Credentials. Please check your username and password.');
+        return;
+      }
+
+      if (found.status === 'Archived') {
+        alert('Access Denied: Account archived. Contact an administrator.');
+        return;
+      }
+
+      currentUser = found;
+      document.getElementById('loginModal').classList.add('hidden');
+      document.getElementById('appContent').classList.remove('hidden');
+      document.getElementById('welcomeUserBanner').innerText = `Welcome, ${currentUser.role} - ${currentUser.email}`;
+
+      if (currentUser.role !== 'Admin') {
+        document.getElementById('userManagementBtn').style.display = 'none';
+      } else {
+        document.getElementById('userManagementBtn').style.display = 'block';
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('appContent').classList.add('hidden');
+      document.getElementById('loginModal').classList.remove('hidden');
+      document.getElementById('loginForm').reset();
+    }
+
+    // ==========================================
+    // PUBLIC CLIENT INQUIRY MODAL
+    // ==========================================
+    function openClientForm() {
+      document.getElementById('clientModal').classList.remove('hidden');
+      document.getElementById('publicInquiryForm').classList.remove('hidden');
+      document.getElementById('clientSuccessMsg').classList.add('hidden');
+    }
+
+    function closeClientForm() {
+      document.getElementById('clientModal').classList.add('hidden');
+    }
+
+    async function submitClientInquiry(e) {
+      e.preventDefault();
+      const today = new Date().toISOString().split('T')[0];
+      const newInquiry = {
+        id: Date.now(),
+        name: document.getElementById('publicName').value,
+        phone: document.getElementById('publicPhone').value,
+        source: 'Client Portal Web',
+        details: document.getElementById('publicDetails').value,
+        followUp: today,
+        status: 'New'
+      };
+
+      if (db) await db.collection('inquiries').add(newInquiry);
+      
+      document.getElementById('publicInquiryForm').reset();
+      document.getElementById('publicInquiryForm').classList.add('hidden');
+      document.getElementById('clientSuccessMsg').classList.remove('hidden');
+    }
+
+    // ==========================================
+    // INTERNAL INQUIRY TRACKER LOGIC
+    // ==========================================
+    async function saveInquiry(e) {
+      e.preventDefault();
+      const newInquiry = {
+        id: Date.now(),
+        name: document.getElementById('custName').value,
+        phone: document.getElementById('custPhone').value,
+        source: document.getElementById('custSource').value,
+        details: document.getElementById('custDetails').value,
+        followUp: document.getElementById('custFollowUp').value,
+        status: 'New'
+      };
+      if (db) await db.collection('inquiries').add(newInquiry);
+      document.getElementById('inquiryForm').reset();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('custFollowUp').value = today;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('inquiryTableBody');
+      if (!tbody) return;
+      const search = (document.getElementById('searchInput').value || '').toLowerCase();
+      tbody.innerHTML = '';
+
+      const filtered = inquiries.filter(i => 
+        i.name.toLowerCase().includes(search) || 
+        i.phone.toLowerCase().includes(search) || 
+        i.details.toLowerCase().includes(search)
+      );
+
+      filtered.forEach(i => {
+        const row = document.createElement('tr');
+        row.className = 'border-b border-slate-700/50 hover:bg-slate-700/30';
+        row.innerHTML = `
+          <td class="p-3 font-semibold text-white">${i.name}<br><span class="text-xs font-normal text-slate-400">${i.phone}</span></td>
+          <td class="p-3"><span class="px-2 py-1 bg-slate-700 rounded text-xs">${i.source}</span></td>
+          <td class="p-3 max-w-xs truncate">${i.details}</td>
+          <td class="p-3"><span class="text-xs font-mono ${new Date(i.followUp) < new Date() ? 'text-rose-400 font-bold' : 'text-slate-300'}">${i.followUp}</span></td>
+          <td class="p-3">
+            <select onchange="updateStatus('${i.docId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+              <option value="New" ${i.status === 'New' ? 'selected' : ''}>New</option>
+              <option value="Quote Sent" ${i.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
+              <option value="Followed Up" ${i.status === 'Followed Up' ? 'selected' : ''}>Followed Up</option>
+              <option value="Won" ${i.status === 'Won' ? 'selected' : ''}>Won</option>
+              <option value="Lost" ${i.status === 'Lost' ? 'selected' : ''}>Lost</option>
+            </select>
+          </td>
+          <td class="p-3 text-right">
+            <button onclick="deleteInquiry('${i.docId}')" class="text-rose-400 hover:text-rose-300 text-xs">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function updateStatus(docId, newStatus) {
+      if (db) await db.collection('inquiries').doc(docId).update({ status: newStatus });
+    }
+
+    async function deleteInquiry(docId) {
+      if (db) await db.collection('inquiries').doc(docId).delete();
+    }
+
+    function updateStats() {
+      if (document.getElementById('statTotal')) {
+        document.getElementById('statTotal').innerText = inquiries.length;
+        document.getElementById('statPending').innerText = inquiries.filter(i => i.status === 'New' || i.status === 'Followed Up').length;
+        document.getElementById('statQuotes').innerText = inquiries.filter(i => i.status === 'Quote Sent').length;
+        document.getElementById('statWon').innerText = inquiries.filter(i => i.status === 'Won').length;
+      }
+    }
+
+    // ==========================================
+    // QUOTATION BUILDER & CUSTOM VARIABLES LOGIC
+    // ==========================================
+    function generateQuoteRef() {
+      const ref = 'PGI-QT-' + Math.floor(1000 + Math.random() * 9000);
+      if (document.getElementById('quoteRef')) document.getElementById('quoteRef').value = ref;
+    }
+
+    function populateInquirySelector() {
       const select = document.getElementById('quoteInquirySelector');
       if (!select) return;
-      select.innerHTML = '<option value="">-- Select Inquiry --</option>';
-      inquiries.forEach(inq => {
-        select.innerHTML += `<option value="${inq.docId}">${inq.name} - ${inq.details}</option>`;
+      select.innerHTML = '<option value="">-- Select Registered Client --</option>';
+      inquiries.forEach(i => {
+        const opt = document.createElement('option');
+        opt.value = i.docId;
+        opt.textContent = `${i.name} (${i.phone}) - ${i.details}`;
+        select.appendChild(opt);
       });
+    }
+
+    function toggleClientTypeMode() {
+      const mode = document.querySelector('input[name="clientType"]:checked').value;
+      if (mode === 'existing') {
+        document.getElementById('existingClientContainer').classList.remove('hidden');
+        document.getElementById('newClientNameContainer').classList.add('hidden');
+        document.getElementById('quoteClientPhone').readOnly = true;
+      } else {
+        document.getElementById('existingClientContainer').classList.add('hidden');
+        document.getElementById('newClientNameContainer').classList.remove('hidden');
+        document.getElementById('quoteClientPhone').readOnly = false;
+        document.getElementById('quoteClientName').value = '';
+        document.getElementById('quoteClientPhone').value = '';
+      }
     }
 
     function autoFillFromInquiry() {
       const docId = document.getElementById('quoteInquirySelector').value;
-      const inq = inquiries.find(i => i.docId === docId);
-      if (inq) {
-        document.getElementById('quoteClientName').value = inq.name;
-        document.getElementById('quoteClientPhone').value = inq.phone;
-        document.getElementById('quoteSubject').value = inq.details;
+      const inquiry = inquiries.find(i => i.docId === docId);
+      if (inquiry) {
+        document.getElementById('quoteClientPhone').value = inquiry.phone;
+        document.getElementById('quoteSubject').value = inquiry.details;
       }
     }
 
-    function addQuoteRow(desc = '', unit = 'Unit', price = 0) {
+    function addQuoteRow(description = '', unit = 'Item', price = 0, qty = 1) {
       const tbody = document.getElementById('quoteLineItemsBody');
+      const rowId = Date.now() + Math.random();
       const tr = document.createElement('tr');
-      tr.className = 'item-row';
+      tr.id = `row-${rowId}`;
+      tr.className = 'hover:bg-slate-800/40';
+
       tr.innerHTML = `
-        <td class="p-2"><input type="text" value="${desc}" placeholder="Item description..." class="item-desc w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200"></td>
-        <td class="p-2"><input type="text" value="${unit}" class="item-unit w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200"></td>
-        <td class="p-2"><input type="number" value="1" min="1" onchange="calcQuoteTotals()" class="item-qty w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-center text-slate-200"></td>
-        <td class="p-2"><input type="number" value="${price}" min="0" step="0.01" onchange="calcQuoteTotals()" class="item-price w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-right text-slate-200"></td>
-        <td class="p-2 text-right font-bold text-xs text-emerald-400 item-total">$0.00</td>
-        <td class="p-2 text-center"><button type="button" onclick="this.closest('tr').remove(); calcQuoteTotals();" class="text-rose-400 hover:text-rose-300">✕</button></td>
+        <td class="p-2">
+          <input type="text" value="${description}" placeholder="Enter product description" class="row-desc w-full px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200">
+        </td>
+        <td class="p-2">
+          <input type="text" value="${unit}" placeholder="Unit (e.g. Length, Hr)" class="row-unit w-full px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-slate-200">
+        </td>
+        <td class="p-2">
+          <input type="number" value="${qty}" min="1" onchange="calculateQuoteTotals()" onkeyup="calculateQuoteTotals()" class="row-qty w-full px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-center text-slate-200">
+        </td>
+        <td class="p-2">
+          <input type="number" value="${price}" step="0.01" min="0" onchange="calculateQuoteTotals()" onkeyup="calculateQuoteTotals()" class="row-price w-full px-2 py-1.5 bg-slate-900 border border-slate-700 rounded text-xs text-right text-slate-200">
+        </td>
+        <td class="p-2 text-right font-mono font-bold text-slate-200 row-total">$0.00</td>
+        <td class="p-2 text-center">
+          <button type="button" onclick="removeQuoteRow('${tr.id}')" class="text-rose-400 hover:text-rose-300 font-bold">&times;</button>
+        </td>
       `;
       tbody.appendChild(tr);
-      calcQuoteTotals();
+      calculateQuoteTotals();
     }
 
-    function calcQuoteTotals() {
+    function removeQuoteRow(rowId) {
+      const row = document.getElementById(rowId);
+      if (row) row.remove();
+      calculateQuoteTotals();
+    }
+
+    function calculateQuoteTotals() {
       let subtotal = 0;
-      document.querySelectorAll('#quoteLineItemsBody tr').forEach(row => {
-        const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+      const rows = document.querySelectorAll('#quoteLineItemsBody tr');
+      rows.forEach(tr => {
+        const qty = parseFloat(tr.querySelector('.row-qty').value) || 0;
+        const price = parseFloat(tr.querySelector('.row-price').value) || 0;
         const total = qty * price;
-        row.querySelector('.item-total').innerText = '$' + total.toFixed(2);
+        tr.querySelector('.row-total').textContent = `$${total.toFixed(2)}`;
         subtotal += total;
       });
 
       const vat = subtotal * 0.15;
       const grandTotal = subtotal + vat;
 
-      document.getElementById('quoteSubtotal').innerText = '$' + subtotal.toFixed(2);
-      document.getElementById('quoteVat').innerText = '$' + vat.toFixed(2);
-      document.getElementById('quoteGrandTotal').innerText = '$' + grandTotal.toFixed(2);
+      document.getElementById('quoteSubtotal').textContent = `$${subtotal.toFixed(2)}`;
+      document.getElementById('quoteVat').textContent = `$${vat.toFixed(2)}`;
+      document.getElementById('quoteGrandTotal').textContent = `$${grandTotal.toFixed(2)}`;
     }
 
     async function handleSaveQuote(e) {
       e.preventDefault();
+      const mode = document.querySelector('input[name="clientType"]:checked').value;
+      let clientName = '';
+      let clientPhone = document.getElementById('quoteClientPhone').value.trim();
+
+      if (mode === 'existing') {
+        const docId = document.getElementById('quoteInquirySelector').value;
+        const selectedInquiry = inquiries.find(i => i.docId === docId);
+        if (!selectedInquiry) {
+          alert('Please select a client from the inquiry list.');
+          return;
+        }
+        clientName = selectedInquiry.name;
+      } else {
+        clientName = document.getElementById('quoteClientName').value.trim();
+        if (!clientName) {
+          alert('Please enter the name of the new client.');
+          return;
+        }
+        // Auto-save new client into Inquiries database
+        const newInquiryDoc = {
+          id: Date.now(),
+          name: clientName,
+          phone: clientPhone,
+          source: 'Quotation Direct Entry',
+          details: document.getElementById('quoteSubject').value,
+          followUp: new Date().toISOString().split('T')[0],
+          status: 'Quote Sent'
+        };
+        if (db) await db.collection('inquiries').add(newInquiryDoc);
+      }
+
+      // Read line items
       const items = [];
-      document.querySelectorAll('#quoteLineItemsBody tr').forEach(row => {
+      const rows = document.querySelectorAll('#quoteLineItemsBody tr');
+      rows.forEach(tr => {
         items.push({
-          desc: row.querySelector('.item-desc').value,
-          unit: row.querySelector('.item-unit').value,
-          qty: parseFloat(row.querySelector('.item-qty').value) || 0,
-          price: parseFloat(row.querySelector('.item-price').value) || 0,
-          total: (parseFloat(row.querySelector('.item-qty').value) || 0) * (parseFloat(row.querySelector('.item-price').value) || 0)
+          desc: tr.querySelector('.row-desc').value || 'Custom Metal Fabrication Work',
+          unit: tr.querySelector('.row-unit').value || 'Item',
+          qty: parseFloat(tr.querySelector('.row-qty').value) || 1,
+          price: parseFloat(tr.querySelector('.row-price').value) || 0
         });
       });
 
-      const subtotal = items.reduce((s, i) => s + i.total, 0);
-      const vat = subtotal * 0.15;
-      const grandTotal = subtotal + vat;
+      if (items.length === 0) {
+        alert('Please add at least one line item to the quotation.');
+        return;
+      }
 
-      const quoteObj = {
+      const subtotal = parseFloat(document.getElementById('quoteSubtotal').textContent.replace('$', '')) || 0;
+      const vat = parseFloat(document.getElementById('quoteVat').textContent.replace('$', '')) || 0;
+      const grandTotal = parseFloat(document.getElementById('quoteGrandTotal').textContent.replace('$', '')) || 0;
+
+      const quoteDoc = {
         ref: document.getElementById('quoteRef').value,
-        client: document.getElementById('quoteClientName').value,
-        phone: document.getElementById('quoteClientPhone').value,
+        clientName: clientName,
+        clientPhone: clientPhone,
         subject: document.getElementById('quoteSubject').value,
         date: document.getElementById('quoteDate').value,
         items: items,
         subtotal: subtotal,
         vat: vat,
         grandTotal: grandTotal,
-        status: 'Sent to Client'
+        status: 'Sent'
       };
 
-      await db.collection('quotations').add(quoteObj);
+      if (db) await db.collection('quotations').add(quoteDoc);
 
-      // Link status back to inquiry if selected
-      const selectedInqDocId = document.getElementById('quoteInquirySelector').value;
-      if (selectedInqDocId) {
-        await db.collection('inquiries').doc(selectedInqDocId).update({ status: 'Quote Sent' });
-      }
-
-      openPrintModal('Quotation', quoteObj);
-      initQuoteForm();
+      alert(`Quotation ${quoteDoc.ref} generated successfully!`);
+      document.getElementById('quoteForm').reset();
+      document.getElementById('quoteLineItemsBody').innerHTML = '';
+      generateQuoteRef();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('quoteDate').value = today;
+      toggleClientTypeMode();
     }
 
     function renderQuotationsTable() {
@@ -608,55 +1051,56 @@
         tr.className = 'border-b border-slate-700/50 hover:bg-slate-700/30';
         tr.innerHTML = `
           <td class="p-3 font-mono font-bold text-rose-400">${q.ref}</td>
-          <td class="p-3 font-semibold text-white">${q.client}</td>
-          <td class="p-3 text-xs">${q.subject}</td>
+          <td class="p-3 font-semibold text-white">${q.clientName}<br><span class="text-xs font-normal text-slate-400">${q.clientPhone}</span></td>
+          <td class="p-3 text-xs max-w-xs truncate">${q.subject}</td>
           <td class="p-3 font-bold text-emerald-400">$${q.grandTotal.toFixed(2)}</td>
-          <td class="p-3"><span class="px-2 py-1 text-xs rounded ${q.status === 'Confirmed Order' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">${q.status}</span></td>
+          <td class="p-3"><span class="px-2 py-1 rounded text-xs font-semibold ${q.status === 'Confirmed Order' ? 'bg-emerald-900/80 text-emerald-200 border border-emerald-700' : 'bg-indigo-900/80 text-indigo-200'}">${q.status}</span></td>
           <td class="p-3 text-right space-x-2">
-            ${q.status !== 'Confirmed Order' ? `
-              <button onclick="confirmOrder('${q.docId}')" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-semibold">Confirm Order</button>
-            ` : ''}
-            <button onclick="openPrintModal('Quotation', getQuoteByDocId('${q.docId}'))" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs">Print</button>
+            <button onclick="previewDocument('quote', '${q.docId}')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-semibold">Preview / Print</button>
+            ${q.status !== 'Confirmed Order' ? `<button onclick="confirmOrderFromQuote('${q.docId}')" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-semibold">Confirm Order</button>` : ''}
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function getQuoteByDocId(docId) { return quotations.find(q => q.docId === docId); }
-
-    async function confirmOrder(docId) {
-      const q = quotations.find(item => item.docId === docId);
+    async function confirmOrderFromQuote(quoteDocId) {
+      const q = quotations.find(item => item.docId === quoteDocId);
       if (!q) return;
 
-      await db.collection('quotations').doc(docId).update({ status: 'Confirmed Order' });
+      // 1. Update quotation status
+      if (db) await db.collection('quotations').doc(quoteDocId).update({ status: 'Confirmed Order' });
 
-      // Update matching inquiry to Won
-      const matchingInq = inquiries.find(i => i.name.toLowerCase() === q.client.toLowerCase());
-      if (matchingInq) {
-        await db.collection('inquiries').doc(matchingInq.docId).update({ status: 'Won' });
+      // 2. Update matching inquiry status to Won
+      const matchingInquiry = inquiries.find(i => i.phone === q.clientPhone);
+      if (matchingInquiry && db) {
+        await db.collection('inquiries').doc(matchingInquiry.docId).update({ status: 'Won' });
       }
 
-      // Generate Tax Invoice automatiquement
-      const newInv = {
-        invNum: 'INV-' + Math.floor(1000 + Math.random() * 9000),
+      // 3. Create Tax Invoice automatically
+      const invoiceDoc = {
+        invoiceNo: 'INV-' + q.ref.replace('PGI-QT-', ''),
         quoteRef: q.ref,
-        client: q.client,
-        phone: q.phone,
+        clientName: q.clientName,
+        clientPhone: q.clientPhone,
         subject: q.subject,
-        date: new Date().toISOString().split('T')[0],
         items: q.items,
         subtotal: q.subtotal,
         vat: q.vat,
         grandTotal: q.grandTotal,
-        paymentStatus: '50% Deposit Paid'
+        paymentStatus: 'Unpaid',
+        date: new Date().toISOString().split('T')[0]
       };
 
-      await db.collection('invoices').add(newInv);
+      if (db) await db.collection('invoices').add(invoiceDoc);
+
+      alert(`Order Confirmed! Tax Invoice ${invoiceDoc.invoiceNo} has been generated.`);
       switchAppTab('invoicesTab');
-      alert(`Order ${q.ref} officially confirmed! Invoice auto-generated.`);
     }
 
+    // ==========================================
+    // INVOICING & PAYMENT LEDGER LOGIC
+    // ==========================================
     function renderInvoicesTable() {
       const tbody = document.getElementById('invoicesTableBody');
       if (!tbody) return;
@@ -666,57 +1110,69 @@
         const tr = document.createElement('tr');
         tr.className = 'border-b border-slate-700/50 hover:bg-slate-700/30';
         tr.innerHTML = `
-          <td class="p-3 font-mono font-bold text-rose-400">${inv.invNum}</td>
-          <td class="p-3 font-semibold text-white">${inv.client}</td>
+          <td class="p-3 font-mono font-bold text-rose-400">${inv.invoiceNo}</td>
+          <td class="p-3 font-semibold text-white">${inv.clientName}<br><span class="text-xs font-normal text-slate-400">${inv.clientPhone}</span></td>
           <td class="p-3 font-bold text-emerald-400">$${inv.grandTotal.toFixed(2)}</td>
           <td class="p-3">
-            <select onchange="updatePaymentStatus('${inv.docId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+            <select onchange="updateInvoicePaymentStatus('${inv.docId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs font-semibold ${inv.paymentStatus === 'Fully Paid' ? 'text-emerald-400' : 'text-amber-400'}">
               <option value="Unpaid" ${inv.paymentStatus === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
               <option value="50% Deposit Paid" ${inv.paymentStatus === '50% Deposit Paid' ? 'selected' : ''}>50% Deposit Paid</option>
               <option value="Fully Paid" ${inv.paymentStatus === 'Fully Paid' ? 'selected' : ''}>Fully Paid</option>
             </select>
           </td>
           <td class="p-3 text-right">
-            <button onclick="openPrintModal('Tax Invoice', getInvoiceByDocId('${inv.docId}'))" class="px-3 py-1 bg-crimson hover:bg-crimson-dark text-white rounded text-xs font-semibold">Print Tax Invoice</button>
+            <button onclick="previewDocument('invoice', '${inv.docId}')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-semibold">Preview / Print</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    function getInvoiceByDocId(docId) { return invoices.find(i => i.docId === docId); }
-
-    async function updatePaymentStatus(docId, newStatus) {
-      await db.collection('invoices').doc(docId).update({ paymentStatus: newStatus });
+    async function updateInvoicePaymentStatus(docId, newStatus) {
+      if (db) await db.collection('invoices').doc(docId).update({ paymentStatus: newStatus });
     }
 
-    function openPrintModal(docType, docData) {
+    // ==========================================
+    // DOCUMENT PREVIEW & PRINT ENGINE
+    // ==========================================
+    function previewDocument(type, docId) {
+      let docData = null;
+      if (type === 'quote') {
+        docData = quotations.find(q => q.docId === docId);
+        document.getElementById('docTypeLabel').textContent = 'QUOTATION';
+        document.getElementById('docNumberText').textContent = docData ? docData.ref : '#';
+      } else {
+        docData = invoices.find(inv => inv.docId === docId);
+        document.getElementById('docTypeLabel').textContent = 'TAX INVOICE';
+        document.getElementById('docNumberText').textContent = docData ? docData.invoiceNo : '#';
+      }
+
       if (!docData) return;
-      document.getElementById('printModalTitle').innerText = `Preview ${docType}: ${docData.ref || docData.invNum}`;
-      document.getElementById('docTypeLabel').innerText = docType;
-      document.getElementById('docNumberText').innerText = '#' + (docData.ref || docData.invNum);
-      document.getElementById('docDateText').innerText = 'Date: ' + docData.date;
-      document.getElementById('docClientName').innerText = docData.client;
-      document.getElementById('docClientPhone').innerText = docData.phone || 'N/A';
-      document.getElementById('docSubjectText').innerText = docData.subject;
+
+      document.getElementById('docClientName').textContent = docData.clientName;
+      document.getElementById('docClientPhone').textContent = docData.clientPhone;
+      document.getElementById('docSubjectText').textContent = docData.subject;
+      document.getElementById('docDateText').textContent = `Date: ${docData.date}`;
 
       const tbody = document.getElementById('docItemsBody');
       tbody.innerHTML = '';
+
       docData.items.forEach(item => {
+        const total = item.qty * item.price;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="p-2.5 font-medium text-slate-800">${item.desc}</td>
-          <td class="p-2.5 text-slate-600">${item.unit}</td>
+          <td class="p-2.5 font-medium">${item.desc}</td>
+          <td class="p-2.5 text-slate-500">${item.unit}</td>
           <td class="p-2.5 text-center font-bold">${item.qty}</td>
-          <td class="p-2.5 text-right text-slate-600">$${parseFloat(item.price).toFixed(2)}</td>
-          <td class="p-2.5 text-right font-bold text-slate-900">$${parseFloat(item.total).toFixed(2)}</td>
+          <td class="p-2.5 text-right">$${item.price.toFixed(2)}</td>
+          <td class="p-2.5 text-right font-bold">$${total.toFixed(2)}</td>
         `;
         tbody.appendChild(tr);
       });
 
-      document.getElementById('docSubtotal').innerText = '$' + docData.subtotal.toFixed(2);
-      document.getElementById('docVat').innerText = '$' + docData.vat.toFixed(2);
-      document.getElementById('docGrandTotal').innerText = '$' + docData.grandTotal.toFixed(2);
+      document.getElementById('docSubtotal').textContent = `$${docData.subtotal.toFixed(2)}`;
+      document.getElementById('docVat').textContent = `$${docData.vat.toFixed(2)}`;
+      document.getElementById('docGrandTotal').textContent = `$${docData.grandTotal.toFixed(2)}`;
 
       document.getElementById('printDocModal').classList.remove('hidden');
     }
@@ -724,5 +1180,191 @@
     function closePrintModal() {
       document.getElementById('printDocModal').classList.add('hidden');
     }
+
+    // ==========================================
+    // VISUAL ANALYTICS GRAPHICAL DASHBOARD
+    // ==========================================
+    function openAnalyticsModal() {
+      document.getElementById('analyticsModal').classList.remove('hidden');
+      renderGraphicalAnalytics();
+    }
+
+    function closeAnalyticsModal() {
+      document.getElementById('analyticsModal').classList.add('hidden');
+    }
+
+    function renderGraphicalAnalytics() {
+      // Graph 1: Status Breakdown
+      const statusCounts = {
+        New: inquiries.filter(i => i.status === 'New').length,
+        'Quote Sent': inquiries.filter(i => i.status === 'Quote Sent').length,
+        'Followed Up': inquiries.filter(i => i.status === 'Followed Up').length,
+        Won: inquiries.filter(i => i.status === 'Won').length,
+        Lost: inquiries.filter(i => i.status === 'Lost').length
+      };
+
+      const statusMax = Math.max(...Object.values(statusCounts), 1);
+      let statusSvg = `<svg class="w-full h-full" viewBox="0 0 240 160">`;
+      const colors = { New: '#fbbf24', 'Quote Sent': '#818cf8', 'Followed Up': '#38bdf8', Won: '#34d399', Lost: '#f87171' };
+      let x = 15;
+      Object.keys(statusCounts).forEach(key => {
+        const val = statusCounts[key];
+        const barH = (val / statusMax) * 100;
+        statusSvg += `
+          <rect x="${x}" y="${130 - barH}" width="28" height="${barH}" fill="${colors[key]}" rx="4" />
+          <text x="${x + 14}" y="${125 - barH}" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="bold">${val}</text>
+          <text x="${x + 14}" y="148" font-size="8" fill="#94a3b8" text-anchor="middle">${key.split(' ')[0]}</text>
+        `;
+        x += 44;
+      });
+      statusSvg += `</svg>`;
+      document.getElementById('chartStatusContainer').innerHTML = statusSvg;
+
+      // Graph 2: Lead Sources
+      const sourceCounts = {};
+      inquiries.forEach(i => {
+        sourceCounts[i.source] = (sourceCounts[i.source] || 0) + 1;
+      });
+
+      let sourceSvg = `<svg class="w-full h-full" viewBox="0 0 200 160">`;
+      const sourceKeys = Object.keys(sourceCounts);
+      const totalInqs = inquiries.length || 1;
+      let startAngle = 0;
+      const palette = ['#e11d48', '#0284c7', '#059669', '#d97706', '#7c3aed', '#475569'];
+
+      if (sourceKeys.length === 0) {
+        sourceSvg += `<text x="100" y="80" font-size="10" fill="#64748b" text-anchor="middle">No Lead Data Available</text>`;
+      } else {
+        sourceKeys.forEach((src, idx) => {
+          const sliceAngle = (sourceCounts[src] / totalInqs) * 360;
+          const x1 = 100 + 50 * Math.cos(Math.PI * startAngle / 180);
+          const y1 = 70 + 50 * Math.sin(Math.PI * startAngle / 180);
+          const endAngle = startAngle + sliceAngle;
+          const x2 = 100 + 50 * Math.cos(Math.PI * endAngle / 180);
+          const y2 = 70 + 50 * Math.sin(Math.PI * endAngle / 180);
+          const largeArc = sliceAngle > 180 ? 1 : 0;
+          const pathData = `M100,70 L${x1},${y1} A50,50 0 ${largeArc},1 ${x2},${y2} Z`;
+
+          sourceSvg += `<path d="${pathData}" fill="${palette[idx % palette.length]}" />`;
+          startAngle = endAngle;
+        });
+      }
+      sourceSvg += `</svg>`;
+      document.getElementById('chartSourceContainer').innerHTML = sourceSvg;
+
+      // Graph 3: Financial Summary
+      const quotedTotal = quotations.reduce((sum, q) => sum + q.grandTotal, 0);
+      const invoicedTotal = invoices.reduce((sum, inv) => sum + inv.grandTotal, 0);
+      const maxRev = Math.max(quotedTotal, invoicedTotal, 1);
+
+      const qBarH = (quotedTotal / maxRev) * 100;
+      const invBarH = (invoicedTotal / maxRev) * 100;
+
+      let finSvg = `<svg class="w-full h-full" viewBox="0 0 200 160">
+        <rect x="40" y="${130 - qBarH}" width="40" height="${qBarH}" fill="#818cf8" rx="4"/>
+        <text x="60" y="${120 - qBarH}" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="bold">$${quotedTotal.toFixed(0)}</text>
+        <text x="60" y="148" font-size="9" fill="#94a3b8" text-anchor="middle">Quotations</text>
+
+        <rect x="120" y="${130 - invBarH}" width="40" height="${invBarH}" fill="#34d399" rx="4"/>
+        <text x="140" y="${120 - invBarH}" font-size="9" fill="#ffffff" text-anchor="middle" font-weight="bold">$${invoicedTotal.toFixed(0)}</text>
+        <text x="140" y="148" font-size="9" fill="#94a3b8" text-anchor="middle">Invoices</text>
+      </svg>`;
+      document.getElementById('chartFinancialContainer').innerHTML = finSvg;
+    }
+
+    // ==========================================
+    // USER MANAGEMENT & CSV EXPORT
+    // ==========================================
+    function openUserModal() {
+      if (!currentUser || currentUser.role !== 'Admin') {
+        alert('Unauthorized: Only administrators can manage users.');
+        return;
+      }
+      document.getElementById('userModal').classList.remove('hidden');
+      renderUsers();
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').classList.add('hidden');
+    }
+
+    async function handleAddUser(e) {
+      e.preventDefault();
+      const email = document.getElementById('newUserEmail').value.trim();
+      const pass = document.getElementById('newUserPassword').value.trim();
+      const role = document.getElementById('newUserRole').value;
+
+      if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+        alert('An account with this username/email already exists.');
+        return;
+      }
+
+      if (db) await db.collection('users').add({ email: email, pass: pass, role: role, status: 'Active' });
+      document.getElementById('addUserForm').reset();
+    }
+
+    async function updateUserRole(docId, newRole) {
+      if (db) await db.collection('users').doc(docId).update({ role: newRole });
+    }
+
+    async function updateUserPassword(docId, index) {
+      const newPass = document.getElementById(`passInput_${index}`).value.trim();
+      if (!newPass) {
+        alert('Please enter a new password.');
+        return;
+      }
+      if (db) await db.collection('users').doc(docId).update({ pass: newPass });
+      document.getElementById(`passInput_${index}`).value = '';
+      alert('Password successfully updated.');
+    }
+
+    async function toggleUserArchive(docId, currentStatus, userEmail) {
+      if (userEmail === currentUser.email) {
+        alert('You cannot archive your own currently logged-in admin account.');
+        return;
+      }
+      const newStatus = currentStatus === 'Archived' ? 'Active' : 'Archived';
+      if (db) await db.collection('users').doc(docId).update({ status: newStatus });
+    }
+
+    function renderUsers() {
+      const container = document.getElementById('userList');
+      if (!container) return;
+      container.innerHTML = users.map((u, index) => `
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-3 rounded-lg border ${u.status === 'Archived' ? 'border-rose-900/50 opacity-60' : 'border-slate-700'} gap-3 text-xs">
+          <div>
+            <p class="font-semibold text-white text-sm">${u.email} ${u.status === 'Archived' ? '<span class="text-rose-400 text-[10px] uppercase font-bold">(Archived)</span>' : ''}</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+            <input type="text" id="passInput_${index}" placeholder="New password" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 w-28">
+            <button onclick="updateUserPassword('${u.id}', ${index})" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded font-semibold">Update Pwd</button>
+            
+            <select onchange="updateUserRole('${u.id}', this.value)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+              <option value="Staff" ${u.role === 'Staff' ? 'selected' : ''}>Staff</option>
+              <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
+            </select>
+
+            <button onclick="toggleUserArchive('${u.id}', '${u.status}', '${u.email}')" class="px-2.5 py-1 rounded text-xs font-semibold ${u.status === 'Archived' ? 'bg-emerald-800 hover:bg-emerald-700 text-white' : 'bg-rose-900/80 hover:bg-rose-800 text-rose-200'}">
+              ${u.status === 'Archived' ? 'Restore' : 'Archive'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function exportToCSV() {
+      if (!inquiries.length) return alert('No inquiries to export');
+      let csv = 'Customer Name,Phone,Source,Details,FollowUp Date,Status\n';
+      inquiries.forEach(i => {
+        csv += `"${i.name}","${i.phone}","${i.source}","${i.details}","${i.followUp}","${i.status}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'PACK_Ground_Inquiries.csv');
+      a.click();
+    }
   </script>
-<!-- ... existing code ... -->
+</body>
+</html>
