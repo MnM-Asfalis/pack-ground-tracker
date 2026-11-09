@@ -97,7 +97,7 @@
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type of Service / Product Required *</label>
-          <textarea id="publicDetails" rows="3" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Describe the service or product you are looking for (e.g., Sliding Gate, Burglar Bars, Steel Fabrication)..."></textarea>
+          <textarea id="publicDetails" rows="3" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Describe the service or product you are looking for..."></textarea>
         </div>
 
         <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow transition text-sm">
@@ -130,7 +130,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button onclick="openUserModal()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg border border-slate-600 transition">
+        <button id="userManagementBtn" onclick="openUserModal()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg border border-slate-600 transition">
           Users & Accounts
         </button>
 
@@ -246,46 +246,48 @@
 
   <!-- USER MANAGEMENT MODAL -->
   <div id="userModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
-    <div class="bg-slate-800 text-slate-100 rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-700 m-4">
+    <div class="bg-slate-800 text-slate-100 rounded-2xl shadow-2xl w-full max-w-2xl p-6 border border-slate-700 m-4">
       <div class="flex justify-between items-center pb-4 border-b border-slate-700">
         <h3 class="text-lg font-bold text-white">Team User & Account Settings</h3>
-        <button onclick="closeUserModal()" class="text-slate-400 hover:text-white">&times;</button>
+        <button onclick="closeUserModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
       </div>
 
-      <div class="py-4 space-y-4">
+      <div class="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+        <!-- ADD NEW USER FORM -->
         <form id="addUserForm" onsubmit="handleAddUser(event)" class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
           <h4 class="text-xs font-bold text-rose-400 uppercase">Add New Team Account</h4>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <input type="text" id="newUserEmail" placeholder="Email / Username" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
             <input type="password" id="newUserPassword" placeholder="Password" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
+            <select id="newUserRole" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
+              <option value="Staff">Staff</option>
+              <option value="Admin">Admin</option>
+            </select>
           </div>
-          <button type="submit" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg text-xs">Save Account</button>
+          <button type="submit" class="w-full py-2 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-xs transition">Create Account</button>
         </form>
 
+        <!-- REGISTERED ACCOUNTS LIST -->
         <div class="space-y-2">
-          <h4 class="text-xs font-bold text-slate-400 uppercase">Registered Accounts</h4>
-          <div id="userList" class="space-y-2 max-h-48 overflow-y-auto"></div>
+          <h4 class="text-xs font-bold text-slate-400 uppercase">Registered Accounts & Credentials Management</h4>
+          <div id="userList" class="space-y-2"></div>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // Initialize default staff account if none exist
-    let users = JSON.parse(localStorage.getItem('pack_ground_users')) || [];
-    if (users.length === 0) {
-      users.push({ email: 'admin@packground.co.zw', pass: 'packground2026', role: 'Admin' });
-      localStorage.setItem('pack_ground_users', JSON.stringify(users));
-    }
+    // Initialize default Admin account and users if none exist
+    let users = JSON.parse(localStorage.getItem('pack_ground_users')) || [
+      { email: 'admin@packground.co.zw', pass: 'packground2026', role: 'Admin', status: 'Active' },
+      { email: 'Ziyambi', pass: 'packground2026', role: 'Staff', status: 'Active' },
+      { email: 'Elton', pass: 'packground2026', role: 'Staff', status: 'Active' },
+      { email: 'Chiedza', pass: 'packground2026', role: 'Staff', status: 'Active' }
+    ];
+    localStorage.setItem('pack_ground_users', JSON.stringify(users));
 
     let inquiries = JSON.parse(localStorage.getItem('pack_ground_inquiries')) || [];
-
-    function openApp() {
-      document.getElementById('loginModal').classList.add('hidden');
-      document.getElementById('appContent').classList.remove('hidden');
-      renderTable();
-      updateStats();
-    }
+    let currentUser = null;
 
     function handleLogin(e) {
       e.preventDefault();
@@ -293,11 +295,37 @@
       const pass = document.getElementById('loginPassword').value.trim();
 
       const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
-      if (found) {
-        openApp();
-      } else {
+      
+      if (!found) {
         alert('Invalid Staff Credentials. Please check your username and password.');
+        return;
       }
+
+      if (found.status === 'Archived') {
+        alert('Access Denied: This account has been archived. Please contact an administrator.');
+        return;
+      }
+
+      currentUser = found;
+      document.getElementById('loginModal').classList.add('hidden');
+      document.getElementById('appContent').classList.remove('hidden');
+
+      // Restrict user management button if logged in user is Staff
+      if (currentUser.role !== 'Admin') {
+        document.getElementById('userManagementBtn').style.display = 'none';
+      } else {
+        document.getElementById('userManagementBtn').style.display = 'block';
+      }
+
+      renderTable();
+      updateStats();
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('appContent').classList.add('hidden');
+      document.getElementById('loginModal').classList.remove('hidden');
+      document.getElementById('loginForm').reset();
     }
 
     function openClientForm() {
@@ -329,11 +357,6 @@
       document.getElementById('publicInquiryForm').reset();
       document.getElementById('publicInquiryForm').classList.add('hidden');
       document.getElementById('clientSuccessMsg').classList.remove('hidden');
-    }
-
-    function handleLogout() {
-      document.getElementById('appContent').classList.add('hidden');
-      document.getElementById('loginModal').classList.remove('hidden');
     }
 
     function saveInquiry(e) {
@@ -411,6 +434,10 @@
     }
 
     function openUserModal() {
+      if (!currentUser || currentUser.role !== 'Admin') {
+        alert('Unauthorized: Only administrators can manage users.');
+        return;
+      }
       document.getElementById('userModal').classList.remove('hidden');
       renderUsers();
     }
@@ -421,22 +448,74 @@
 
     function handleAddUser(e) {
       e.preventDefault();
-      const email = document.getElementById('newUserEmail').value;
-      const pass = document.getElementById('newUserPassword').value;
-      users.push({ email: email, pass: pass, role: 'Staff' });
+      const email = document.getElementById('newUserEmail').value.trim();
+      const pass = document.getElementById('newUserPassword').value.trim();
+      const role = document.getElementById('newUserRole').value;
+
+      if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+        alert('An account with this username/email already exists.');
+        return;
+      }
+
+      users.push({ email: email, pass: pass, role: role, status: 'Active' });
       localStorage.setItem('pack_ground_users', JSON.stringify(users));
       document.getElementById('addUserForm').reset();
       renderUsers();
     }
 
+    function updateUserRole(index, newRole) {
+      users[index].role = newRole;
+      localStorage.setItem('pack_ground_users', JSON.stringify(users));
+      renderUsers();
+    }
+
+    function updateUserPassword(index) {
+      const newPass = document.getElementById(`passInput_${index}`).value.trim();
+      if (!newPass) {
+        alert('Please enter a new password.');
+        return;
+      }
+      users[index].pass = newPass;
+      localStorage.setItem('pack_ground_users', JSON.stringify(users));
+      document.getElementById(`passInput_${index}`).value = '';
+      alert(`Password successfully updated for ${users[index].email}`);
+      renderUsers();
+    }
+
+    function toggleUserArchive(index) {
+      const user = users[index];
+      if (user.email === currentUser.email) {
+        alert('You cannot archive your own currently logged-in admin account.');
+        return;
+      }
+      user.status = user.status === 'Archived' ? 'Active' : 'Archived';
+      localStorage.setItem('pack_ground_users', JSON.stringify(users));
+      renderUsers();
+    }
+
     function renderUsers() {
       const container = document.getElementById('userList');
-      container.innerHTML = users.map(u => `
-        <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs">
+      container.innerHTML = users.map((u, index) => `
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-3 rounded-lg border ${u.status === 'Archived' ? 'border-rose-900/50 opacity-60' : 'border-slate-700'} gap-3 text-xs">
           <div>
-            <p class="font-semibold text-white">${u.email}</p>
+            <p class="font-semibold text-white text-sm">${u.email} ${u.status === 'Archived' ? '<span class="text-rose-400 text-[10px] uppercase font-bold">(Archived)</span>' : ''}</p>
           </div>
-          <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded">${u.role}</span>
+          <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+            <!-- Password Reset Input -->
+            <input type="text" id="passInput_${index}" placeholder="New password" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 w-28">
+            <button onclick="updateUserPassword(${index})" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded font-semibold">Update Pwd</button>
+            
+            <!-- Role Selector -->
+            <select onchange="updateUserRole(${index}, this.value)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+              <option value="Staff" ${u.role === 'Staff' ? 'selected' : ''}>Staff</option>
+              <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
+            </select>
+
+            <!-- Archive / Restore -->
+            <button onclick="toggleUserArchive(${index})" class="px-2.5 py-1 rounded text-xs font-semibold ${u.status === 'Archived' ? 'bg-emerald-800 hover:bg-emerald-700 text-white' : 'bg-rose-900/80 hover:bg-rose-800 text-rose-200'}">
+              ${u.status === 'Archived' ? 'Restore' : 'Archive'}
+            </button>
+          </div>
         </div>
       `).join('');
     }
