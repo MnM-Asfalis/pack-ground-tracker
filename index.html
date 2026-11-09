@@ -34,7 +34,7 @@
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Staff Email / Username</label>
-          <input type="text" id="loginEmail" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter staff username">
+          <input type="text" id="loginEmail" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="e.g. admin@packground.co.zw">
         </div>
 
         <div>
@@ -47,7 +47,7 @@
         </button>
       </form>
 
-      <!-- CLIENT INQUIRY TAB / BUTTON -->
+      <!-- CLIENT INQUIRY BUTTON -->
       <div class="mt-4 pt-4 border-t border-slate-100">
         <button type="button" onclick="openClientForm()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs transition shadow flex items-center justify-center gap-2">
           <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type of Service / Product Required *</label>
-          <textarea id="publicDetails" rows="3" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Describe the service or product you are looking for (e.g., Sliding Gate, Burglar Bars, Steel Fabrication, Repair)..."></textarea>
+          <textarea id="publicDetails" rows="3" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Describe the service or product you are looking for (e.g., Sliding Gate, Burglar Bars, Steel Fabrication)..."></textarea>
         </div>
 
         <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow transition text-sm">
@@ -146,7 +146,6 @@
 
     <!-- CONTENT BODY -->
     <main class="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full">
-      
       <!-- STATS METRICS -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
@@ -192,7 +191,7 @@
               <option value="Email">Email</option>
               <option value="Social Media">Social Media</option>
               <option value="Verbal / Walk-in">Verbal / Walk-in</option>
-              <option value="Client Portal">Client Portal Web</option>
+              <option value="Client Portal Web">Client Portal Web</option>
             </select>
           </div>
 
@@ -272,7 +271,13 @@
   </div>
 
   <script>
+    // Initialize default staff account if none exist
     let users = JSON.parse(localStorage.getItem('pack_ground_users')) || [];
+    if (users.length === 0) {
+      users.push({ email: 'admin@packground.co.zw', pass: 'packground2026', role: 'Admin' });
+      localStorage.setItem('pack_ground_users', JSON.stringify(users));
+    }
+
     let inquiries = JSON.parse(localStorage.getItem('pack_ground_inquiries')) || [];
 
     function openApp() {
@@ -286,15 +291,6 @@
       e.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
       const pass = document.getElementById('loginPassword').value.trim();
-
-      if (!email || !pass) return;
-
-      if (users.length === 0) {
-        users.push({ email: email, pass: pass, role: 'Admin' });
-        localStorage.setItem('pack_ground_users', JSON.stringify(users));
-        openApp();
-        return;
-      }
 
       const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
       if (found) {
