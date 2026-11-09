@@ -16,26 +16,25 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
 
   <!-- LOGIN MODAL -->
-  <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm">
-    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-200 m-4 relative overflow-hidden">
+  <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
+    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-200 relative overflow-hidden">
       <div class="h-2 bg-crimson absolute top-0 left-0 right-0"></div>
       
       <!-- LOGO -->
       <div class="flex flex-col items-center mb-6 text-center">
-        <div class="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-2 shadow-inner border border-rose-100">
-          <svg class="w-10 h-10 text-crimson" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V9a2 2 0 012-2h2a2 2 0 012 2v12"/>
-          </svg>
+        <div class="w-24 h-24 rounded-full flex items-center justify-center mb-3 shadow-md border-2 border-slate-100 overflow-hidden bg-white">
+          <img src="Pack Ground Logo.jpeg" alt="PACK Ground Investments Logo" class="w-full h-full object-cover">
         </div>
-        <h2 class="text-xl font-bold text-slate-900">PACK GROUND</h2>
+        <h2 class="text-xl font-bold text-slate-900 tracking-tight">PACK GROUND</h2>
         <p class="text-xs font-semibold tracking-widest text-crimson uppercase">INVESTMENTS</p>
-        <p class="text-xs text-slate-500 mt-1">Client Inquiry & Follow-Up Portal</p>
+        <p class="text-xs text-slate-500 mt-1">Staff Portal & Client Inquiry Gateway</p>
       </div>
 
+      <!-- STAFF LOGIN FORM -->
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email / Username</label>
-          <input type="text" id="loginEmail" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter your email or username">
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Staff Email / Username</label>
+          <input type="text" id="loginEmail" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter staff username">
         </div>
 
         <div>
@@ -44,29 +43,86 @@
         </div>
 
         <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow-md transition duration-200 text-sm flex items-center justify-center gap-2">
-          Login to Dashboard
-        </button>
-
-        <button type="button" onclick="bypassLogin()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium rounded-lg text-xs transition">
-          Direct Access (Skip Login)
+          Staff Login to Dashboard
         </button>
       </form>
 
-      <div class="mt-6 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
-        46 Caledon Avenue, Hatfield, Harare<br>
-        +263 242 586 658 // +263 718 864 757
+      <!-- CLIENT INQUIRY TAB / BUTTON -->
+      <div class="mt-4 pt-4 border-t border-slate-100">
+        <button type="button" onclick="openClientForm()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs transition shadow flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Submit Customer Inquiry (Client Portal)
+        </button>
+      </div>
+
+      <!-- FOOTER & DEVELOPER ATTRIBUTION -->
+      <div class="mt-6 pt-4 border-t border-slate-100 text-center text-[11px] text-slate-500 space-y-1">
+        <p class="font-medium text-slate-600">46 Caledon Avenue, Hatfield, Harare</p>
+        <p>+263 242 586 658 // +263 718 864 757</p>
+        <p class="text-[10px] text-slate-400 font-semibold pt-2 border-t border-slate-100 mt-2">
+          Developed by Asfalis Group 2026 | Phone: +263 772 911 806
+        </p>
       </div>
     </div>
   </div>
 
-  <!-- MAIN APP CONTENT -->
+  <!-- PUBLIC CLIENT INQUIRY MODAL -->
+  <div id="clientModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden">
+    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-200 relative overflow-hidden">
+      <div class="h-2 bg-crimson absolute top-0 left-0 right-0"></div>
+      
+      <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-3">
+          <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-200 object-cover">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 leading-tight">PACK GROUND INVESTMENTS</h3>
+            <p class="text-xs text-rose-700 font-medium">Customer Service Request Portal</p>
+          </div>
+        </div>
+        <button onclick="closeClientForm()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="publicInquiryForm" onsubmit="submitClientInquiry(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
+          <input type="text" id="publicName" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter your full name">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone / WhatsApp Number *</label>
+          <input type="text" id="publicPhone" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="e.g. +263 77 123 4567">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type of Service / Product Required *</label>
+          <textarea id="publicDetails" rows="3" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Describe the service or product you are looking for (e.g., Sliding Gate, Burglar Bars, Steel Fabrication, Repair)..."></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow transition text-sm">
+          Submit Inquiry to PACK Ground
+        </button>
+      </form>
+
+      <div id="clientSuccessMsg" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-center">
+        <p class="text-emerald-800 font-semibold text-sm">Thank you! Your inquiry has been submitted successfully.</p>
+        <p class="text-xs text-emerald-600 mt-1">Our sales team at PACK Ground Investments will reach out to you shortly.</p>
+        <button onclick="closeClientForm()" class="mt-3 px-4 py-1.5 bg-emerald-700 text-white rounded-lg text-xs font-semibold">Done</button>
+      </div>
+
+      <div class="mt-6 pt-3 border-t border-slate-100 text-center text-[10px] text-slate-400 font-semibold">
+        Developed by Asfalis Group 2026 | Phone: +263 772 911 806
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD CONTENT -->
   <div id="appContent" class="flex-1 flex flex-col hidden">
     <!-- TOP HEADER -->
     <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between shadow-md">
       <div class="flex items-center gap-4">
-        <div class="w-10 h-10 bg-crimson rounded-lg flex items-center justify-center text-white font-bold text-xl shadow">
-          P
-        </div>
+        <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-600 object-cover">
         <div>
           <h1 class="text-lg font-bold text-white leading-tight">PACK GROUND INVESTMENTS</h1>
           <p class="text-xs text-slate-400">Hatfield, Harare | Inquiry Management Dashboard</p>
@@ -116,7 +172,7 @@
 
       <!-- INQUIRY FORM -->
       <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400 mb-4">Log New Customer Inquiry</h2>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400 mb-4">Log New Customer Inquiry (Internal Staff)</h2>
         <form id="inquiryForm" onsubmit="saveInquiry(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs text-slate-400 mb-1">Customer Name *</label>
@@ -136,6 +192,7 @@
               <option value="Email">Email</option>
               <option value="Social Media">Social Media</option>
               <option value="Verbal / Walk-in">Verbal / Walk-in</option>
+              <option value="Client Portal">Client Portal Web</option>
             </select>
           </div>
 
@@ -181,6 +238,11 @@
         </div>
       </div>
     </main>
+
+    <!-- DASHBOARD DEVELOPER FOOTER -->
+    <footer class="bg-slate-900 py-3 text-center text-xs text-slate-500 border-t border-slate-800">
+      Developed by Asfalis Group 2026 | Phone: +263 772 911 806
+    </footer>
   </div>
 
   <!-- USER MANAGEMENT MODAL -->
@@ -196,184 +258,4 @@
           <h4 class="text-xs font-bold text-rose-400 uppercase">Add New Team Account</h4>
           <div class="grid grid-cols-2 gap-3">
             <input type="text" id="newUserEmail" placeholder="Email / Username" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
-            <input type="password" id="newUserPassword" placeholder="Password" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
-          </div>
-          <button type="submit" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg text-xs">Save Account</button>
-        </form>
-
-        <div class="space-y-2">
-          <h4 class="text-xs font-bold text-slate-400 uppercase">Registered Accounts</h4>
-          <div id="userList" class="space-y-2 max-h-48 overflow-y-auto"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let users = JSON.parse(localStorage.getItem('pack_ground_users')) || [];
-    let inquiries = JSON.parse(localStorage.getItem('pack_ground_inquiries')) || [];
-
-    function openApp() {
-      document.getElementById('loginModal').classList.add('hidden');
-      document.getElementById('appContent').classList.remove('hidden');
-      renderTable();
-      updateStats();
-    }
-
-    function handleLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const pass = document.getElementById('loginPassword').value.trim();
-
-      if (!email || !pass) return;
-
-      // If no accounts registered yet, auto-create this one as Admin
-      if (users.length === 0) {
-        users.push({ email: email, pass: pass, role: 'Admin' });
-        localStorage.setItem('pack_ground_users', JSON.stringify(users));
-        openApp();
-        return;
-      }
-
-      // Check existing accounts
-      const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
-      if (found) {
-        openApp();
-      } else {
-        // If not found, add as user to prevent lockouts
-        users.push({ email: email, pass: pass, role: 'Staff' });
-        localStorage.setItem('pack_ground_users', JSON.stringify(users));
-        openApp();
-      }
-    }
-
-    function bypassLogin() {
-      openApp();
-    }
-
-    function handleLogout() {
-      document.getElementById('appContent').classList.add('hidden');
-      document.getElementById('loginModal').classList.remove('hidden');
-    }
-
-    function saveInquiry(e) {
-      e.preventDefault();
-      const newInquiry = {
-        id: Date.now(),
-        name: document.getElementById('custName').value,
-        phone: document.getElementById('custPhone').value,
-        source: document.getElementById('custSource').value,
-        details: document.getElementById('custDetails').value,
-        followUp: document.getElementById('custFollowUp').value,
-        status: 'New'
-      };
-      inquiries.unshift(newInquiry);
-      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
-      document.getElementById('inquiryForm').reset();
-      renderTable();
-      updateStats();
-    }
-
-    function renderTable() {
-      const tbody = document.getElementById('inquiryTableBody');
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      tbody.innerHTML = '';
-
-      const filtered = inquiries.filter(i => 
-        i.name.toLowerCase().includes(search) || 
-        i.phone.toLowerCase().includes(search) || 
-        i.details.toLowerCase().includes(search)
-      );
-
-      filtered.forEach(i => {
-        const row = document.createElement('tr');
-        row.className = 'border-b border-slate-700/50 hover:bg-slate-700/30';
-        row.innerHTML = `
-          <td class="p-3 font-semibold text-white">${i.name}<br><span class="text-xs font-normal text-slate-400">${i.phone}</span></td>
-          <td class="p-3"><span class="px-2 py-1 bg-slate-700 rounded text-xs">${i.source}</span></td>
-          <td class="p-3 max-w-xs truncate">${i.details}</td>
-          <td class="p-3"><span class="text-xs font-mono ${new Date(i.followUp) < new Date() ? 'text-rose-400 font-bold' : 'text-slate-300'}">${i.followUp}</span></td>
-          <td class="p-3">
-            <select onchange="updateStatus(${i.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
-              <option value="New" ${i.status === 'New' ? 'selected' : ''}>New</option>
-              <option value="Quote Sent" ${i.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
-              <option value="Followed Up" ${i.status === 'Followed Up' ? 'selected' : ''}>Followed Up</option>
-              <option value="Won" ${i.status === 'Won' ? 'selected' : ''}>Won</option>
-              <option value="Lost" ${i.status === 'Lost' ? 'selected' : ''}>Lost</option>
-            </select>
-          </td>
-          <td class="p-3 text-right">
-            <button onclick="deleteInquiry(${i.id})" class="text-rose-400 hover:text-rose-300 text-xs">Delete</button>
-          </td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function updateStatus(id, newStatus) {
-      inquiries = inquiries.map(i => i.id === id ? { ...i, status: newStatus } : i);
-      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
-      updateStats();
-    }
-
-    function deleteInquiry(id) {
-      inquiries = inquiries.filter(i => i.id !== id);
-      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
-      renderTable();
-      updateStats();
-    }
-
-    function updateStats() {
-      document.getElementById('statTotal').innerText = inquiries.length;
-      document.getElementById('statPending').innerText = inquiries.filter(i => i.status === 'New' || i.status === 'Followed Up').length;
-      document.getElementById('statQuotes').innerText = inquiries.filter(i => i.status === 'Quote Sent').length;
-      document.getElementById('statWon').innerText = inquiries.filter(i => i.status === 'Won').length;
-    }
-
-    function openUserModal() {
-      document.getElementById('userModal').classList.remove('hidden');
-      renderUsers();
-    }
-
-    function closeUserModal() {
-      document.getElementById('userModal').classList.add('hidden');
-    }
-
-    function handleAddUser(e) {
-      e.preventDefault();
-      const email = document.getElementById('newUserEmail').value;
-      const pass = document.getElementById('newUserPassword').value;
-      users.push({ email: email, pass: pass, role: 'Staff' });
-      localStorage.setItem('pack_ground_users', JSON.stringify(users));
-      document.getElementById('addUserForm').reset();
-      renderUsers();
-    }
-
-    function renderUsers() {
-      const container = document.getElementById('userList');
-      container.innerHTML = users.map(u => `
-        <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs">
-          <div>
-            <p class="font-semibold text-white">${u.email}</p>
-          </div>
-          <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded">${u.role}</span>
-        </div>
-      `).join('');
-    }
-
-    function exportToCSV() {
-      if (!inquiries.length) return alert('No inquiries to export');
-      let csv = 'Customer Name,Phone,Source,Details,FollowUp Date,Status\n';
-      inquiries.forEach(i => {
-        csv += `"${i.name}","${i.phone}","${i.source}","${i.details}","${i.followUp}","${i.status}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('href', url);
-      a.setAttribute('download', 'PACK_Ground_Inquiries.csv');
-      a.click();
-    }
-  </script>
-</body>
-</html>
+            <input type="password" id="newUserPassword
