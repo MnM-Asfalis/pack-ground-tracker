@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PACK Ground Investments - Client Inquiry Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase App & Firestore SDKs (Compat Version) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     body { font-family: 'Inter', sans-serif; }
@@ -125,7 +128,7 @@
         <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-600 object-cover">
         <div>
           <h1 class="text-lg font-bold text-white leading-tight">PACK GROUND INVESTMENTS</h1>
-          <p class="text-xs text-slate-400">Hatfield, Harare | Inquiry Management Dashboard</p>
+          <p id="welcomeUserBanner" class="text-xs text-rose-400 font-medium mt-0.5">Welcome</p>
         </div>
       </div>
 
@@ -277,19 +280,68 @@
   </div>
 
   <script>
-    // Initialize default Admin account and users if none exist
-    let users = JSON.parse(localStorage.getItem('pack_ground_users')) || [
-      { email: 'admin@packground.co.zw', pass: 'packground2026', role: 'Admin', status: 'Active' },
-      { email: 'Ziyambi', pass: 'packground2026', role: 'Staff', status: 'Active' },
-      { email: 'Elton', pass: 'packground2026', role: 'Staff', status: 'Active' },
-      { email: 'Chiedza', pass: 'packground2026', role: 'Staff', status: 'Active' }
-    ];
-    localStorage.setItem('pack_ground_users', JSON.stringify(users));
+    // ==========================================
+    // FIREBASE CLOUD CONFIGURATION
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBwLjWo5yY4YRY5noKQZqhTiNLB8PYcTLo",
+      authDomain: "pack-ground-tracker.firebaseapp.com",
+      projectId: "pack-ground-tracker",
+      storageBucket: "pack-ground-tracker.appspot.com",
+      messagingSenderId: "199008755535",
+      appId: "1:199008755535:web:50b0064769705d254caf3a"
+    };
 
-    let inquiries = JSON.parse(localStorage.getItem('pack_ground_inquiries')) || [];
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let users = [];
+    let inquiries = [];
     let currentUser = null;
 
-    function handleLogin(e) {
+    // Seed default admin accounts if database is empty, then load real-time data
+    async function initDatabase() {
+      const usersSnap = await db.collection('users').get();
+      if (usersSnap.empty) {
+        const defaultUsers = [
+          { email: 'admin@packground.co.zw', pass: 'packground2026', role: 'Admin', status: 'Active' },
+          { email: 'Ziyambi', pass: 'packground2026', role: 'Staff', status: 'Active' },
+          { email: 'Elton', pass: 'packground2026', role: 'Staff', status: 'Active' },
+          { email: 'Chiedza', pass: 'packground2026', role: 'Staff', status: 'Active' }
+        ];
+        for (let u of defaultUsers) {
+          await db.collection('users').add(u);
+        }
+      }
+      loadRealtimeData();
+    }
+
+    // Real-time synchronization listeners for live updates across phone & laptop
+    function loadRealtimeData() {
+      db.collection('users').onSnapshot(snapshot => {
+        users = [];
+        snapshot.forEach(doc => {
+          users.push({ id: doc.id, ...doc.data() });
+        });
+        if (document.getElementById('userModal') && !document.getElementById('userModal').classList.contains('hidden')) {
+          renderUsers();
+        }
+      });
+
+      db.collection('inquiries').orderBy('id', 'desc').onSnapshot(snapshot => {
+        inquiries = [];
+        snapshot.forEach(doc => {
+          inquiries.push({ docId: doc.id, ...doc.data() });
+        });
+        renderTable();
+        updateStats();
+      });
+    }
+
+    initDatabase();
+
+    async function handleLogin(e) {
       e.preventDefault();
       const email = document.getElementById('loginEmail').value.trim();
       const pass = document.getElementById('loginPassword').value.trim();
@@ -310,15 +362,15 @@
       document.getElementById('loginModal').classList.add('hidden');
       document.getElementById('appContent').classList.remove('hidden');
 
+      // Display Welcome message with Role and Username on top header
+      document.getElementById('welcomeUserBanner').innerText = `Welcome, ${currentUser.role} - ${currentUser.email}`;
+
       // Restrict user management button if logged in user is Staff
       if (currentUser.role !== 'Admin') {
         document.getElementById('userManagementBtn').style.display = 'none';
       } else {
         document.getElementById('userManagementBtn').style.display = 'block';
       }
-
-      renderTable();
-      updateStats();
     }
 
     function handleLogout() {
@@ -338,7 +390,7 @@
       document.getElementById('clientModal').classList.add('hidden');
     }
 
-    function submitClientInquiry(e) {
+    async function submitClientInquiry(e) {
       e.preventDefault();
       const today = new Date().toISOString().split('T')[0];
       const newInquiry = {
@@ -351,15 +403,14 @@
         status: 'New'
       };
 
-      inquiries.unshift(newInquiry);
-      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
+      await db.collection('inquiries').add(newInquiry);
       
       document.getElementById('publicInquiryForm').reset();
       document.getElementById('publicInquiryForm').classList.add('hidden');
       document.getElementById('clientSuccessMsg').classList.remove('hidden');
     }
 
-    function saveInquiry(e) {
+    async function saveInquiry(e) {
       e.preventDefault();
       const newInquiry = {
         id: Date.now(),
@@ -370,15 +421,13 @@
         followUp: document.getElementById('custFollowUp').value,
         status: 'New'
       };
-      inquiries.unshift(newInquiry);
-      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
+      await db.collection('inquiries').add(newInquiry);
       document.getElementById('inquiryForm').reset();
-      renderTable();
-      updateStats();
     }
 
     function renderTable() {
       const tbody = document.getElementById('inquiryTableBody');
+      if (!tbody) return;
       const search = document.getElementById('searchInput').value.toLowerCase();
       tbody.innerHTML = '';
 
@@ -397,7 +446,7 @@
           <td class="p-3 max-w-xs truncate">${i.details}</td>
           <td class="p-3"><span class="text-xs font-mono ${new Date(i.followUp) < new Date() ? 'text-rose-400 font-bold' : 'text-slate-300'}">${i.followUp}</span></td>
           <td class="p-3">
-            <select onchange="updateStatus(${i.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+            <select onchange="updateStatus('${i.docId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
               <option value="New" ${i.status === 'New' ? 'selected' : ''}>New</option>
               <option value="Quote Sent" ${i.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
               <option value="Followed Up" ${i.status === 'Followed Up' ? 'selected' : ''}>Followed Up</option>
@@ -406,31 +455,28 @@
             </select>
           </td>
           <td class="p-3 text-right">
-            <button onclick="deleteInquiry(${i.id})" class="text-rose-400 hover:text-rose-300 text-xs">Delete</button>
+            <button onclick="deleteInquiry('${i.docId}')" class="text-rose-400 hover:text-rose-300 text-xs">Delete</button>
           </td>
         `;
         tbody.appendChild(row);
       });
     }
 
-    function updateStatus(id, newStatus) {
-      inquiries = inquiries.map(i => i.id === id ? { ...i, status: newStatus } : i);
-      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
-      updateStats();
+    async function updateStatus(docId, newStatus) {
+      await db.collection('inquiries').doc(docId).update({ status: newStatus });
     }
 
-    function deleteInquiry(id) {
-      inquiries = inquiries.filter(i => i.id !== id);
-      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
-      renderTable();
-      updateStats();
+    async function deleteInquiry(docId) {
+      await db.collection('inquiries').doc(docId).delete();
     }
 
     function updateStats() {
-      document.getElementById('statTotal').innerText = inquiries.length;
-      document.getElementById('statPending').innerText = inquiries.filter(i => i.status === 'New' || i.status === 'Followed Up').length;
-      document.getElementById('statQuotes').innerText = inquiries.filter(i => i.status === 'Quote Sent').length;
-      document.getElementById('statWon').innerText = inquiries.filter(i => i.status === 'Won').length;
+      if (document.getElementById('statTotal')) {
+        document.getElementById('statTotal').innerText = inquiries.length;
+        document.getElementById('statPending').innerText = inquiries.filter(i => i.status === 'New' || i.status === 'Followed Up').length;
+        document.getElementById('statQuotes').innerText = inquiries.filter(i => i.status === 'Quote Sent').length;
+        document.getElementById('statWon').innerText = inquiries.filter(i => i.status === 'Won').length;
+      }
     }
 
     function openUserModal() {
@@ -446,7 +492,7 @@
       document.getElementById('userModal').classList.add('hidden');
     }
 
-    function handleAddUser(e) {
+    async function handleAddUser(e) {
       e.preventDefault();
       const email = document.getElementById('newUserEmail').value.trim();
       const pass = document.getElementById('newUserPassword').value.trim();
@@ -457,62 +503,52 @@
         return;
       }
 
-      users.push({ email: email, pass: pass, role: role, status: 'Active' });
-      localStorage.setItem('pack_ground_users', JSON.stringify(users));
+      await db.collection('users').add({ email: email, pass: pass, role: role, status: 'Active' });
       document.getElementById('addUserForm').reset();
-      renderUsers();
     }
 
-    function updateUserRole(index, newRole) {
-      users[index].role = newRole;
-      localStorage.setItem('pack_ground_users', JSON.stringify(users));
-      renderUsers();
+    async function updateUserRole(docId, newRole) {
+      await db.collection('users').doc(docId).update({ role: newRole });
     }
 
-    function updateUserPassword(index) {
+    async function updateUserPassword(docId, index) {
       const newPass = document.getElementById(`passInput_${index}`).value.trim();
       if (!newPass) {
         alert('Please enter a new password.');
         return;
       }
-      users[index].pass = newPass;
-      localStorage.setItem('pack_ground_users', JSON.stringify(users));
+      await db.collection('users').doc(docId).update({ pass: newPass });
       document.getElementById(`passInput_${index}`).value = '';
-      alert(`Password successfully updated for ${users[index].email}`);
-      renderUsers();
+      alert('Password successfully updated.');
     }
 
-    function toggleUserArchive(index) {
-      const user = users[index];
-      if (user.email === currentUser.email) {
+    async function toggleUserArchive(docId, currentStatus, userEmail) {
+      if (userEmail === currentUser.email) {
         alert('You cannot archive your own currently logged-in admin account.');
         return;
       }
-      user.status = user.status === 'Archived' ? 'Active' : 'Archived';
-      localStorage.setItem('pack_ground_users', JSON.stringify(users));
-      renderUsers();
+      const newStatus = currentStatus === 'Archived' ? 'Active' : 'Archived';
+      await db.collection('users').doc(docId).update({ status: newStatus });
     }
 
     function renderUsers() {
       const container = document.getElementById('userList');
+      if (!container) return;
       container.innerHTML = users.map((u, index) => `
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-3 rounded-lg border ${u.status === 'Archived' ? 'border-rose-900/50 opacity-60' : 'border-slate-700'} gap-3 text-xs">
           <div>
             <p class="font-semibold text-white text-sm">${u.email} ${u.status === 'Archived' ? '<span class="text-rose-400 text-[10px] uppercase font-bold">(Archived)</span>' : ''}</p>
           </div>
           <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-            <!-- Password Reset Input -->
             <input type="text" id="passInput_${index}" placeholder="New password" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 w-28">
-            <button onclick="updateUserPassword(${index})" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded font-semibold">Update Pwd</button>
+            <button onclick="updateUserPassword('${u.id}', ${index})" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded font-semibold">Update Pwd</button>
             
-            <!-- Role Selector -->
-            <select onchange="updateUserRole(${index}, this.value)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+            <select onchange="updateUserRole('${u.id}', this.value)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
               <option value="Staff" ${u.role === 'Staff' ? 'selected' : ''}>Staff</option>
               <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
             </select>
 
-            <!-- Archive / Restore -->
-            <button onclick="toggleUserArchive(${index})" class="px-2.5 py-1 rounded text-xs font-semibold ${u.status === 'Archived' ? 'bg-emerald-800 hover:bg-emerald-700 text-white' : 'bg-rose-900/80 hover:bg-rose-800 text-rose-200'}">
+            <button onclick="toggleUserArchive('${u.id}', '${u.status}', '${u.email}')" class="px-2.5 py-1 rounded text-xs font-semibold ${u.status === 'Archived' ? 'bg-emerald-800 hover:bg-emerald-700 text-white' : 'bg-rose-900/80 hover:bg-rose-800 text-rose-200'}">
               ${u.status === 'Archived' ? 'Restore' : 'Archive'}
             </button>
           </div>
