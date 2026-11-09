@@ -258,4 +258,206 @@
           <h4 class="text-xs font-bold text-rose-400 uppercase">Add New Team Account</h4>
           <div class="grid grid-cols-2 gap-3">
             <input type="text" id="newUserEmail" placeholder="Email / Username" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
-            <input type="password" id="newUserPassword
+            <input type="password" id="newUserPassword" placeholder="Password" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
+          </div>
+          <button type="submit" class="w-full py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg text-xs">Save Account</button>
+        </form>
+
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-400 uppercase">Registered Accounts</h4>
+          <div id="userList" class="space-y-2 max-h-48 overflow-y-auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let users = JSON.parse(localStorage.getItem('pack_ground_users')) || [];
+    let inquiries = JSON.parse(localStorage.getItem('pack_ground_inquiries')) || [];
+
+    function openApp() {
+      document.getElementById('loginModal').classList.add('hidden');
+      document.getElementById('appContent').classList.remove('hidden');
+      renderTable();
+      updateStats();
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPassword').value.trim();
+
+      if (!email || !pass) return;
+
+      if (users.length === 0) {
+        users.push({ email: email, pass: pass, role: 'Admin' });
+        localStorage.setItem('pack_ground_users', JSON.stringify(users));
+        openApp();
+        return;
+      }
+
+      const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
+      if (found) {
+        openApp();
+      } else {
+        alert('Invalid Staff Credentials. Please check your username and password.');
+      }
+    }
+
+    function openClientForm() {
+      document.getElementById('clientModal').classList.remove('hidden');
+      document.getElementById('publicInquiryForm').classList.remove('hidden');
+      document.getElementById('clientSuccessMsg').classList.add('hidden');
+    }
+
+    function closeClientForm() {
+      document.getElementById('clientModal').classList.add('hidden');
+    }
+
+    function submitClientInquiry(e) {
+      e.preventDefault();
+      const today = new Date().toISOString().split('T')[0];
+      const newInquiry = {
+        id: Date.now(),
+        name: document.getElementById('publicName').value,
+        phone: document.getElementById('publicPhone').value,
+        source: 'Client Portal Web',
+        details: document.getElementById('publicDetails').value,
+        followUp: today,
+        status: 'New'
+      };
+
+      inquiries.unshift(newInquiry);
+      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
+      
+      document.getElementById('publicInquiryForm').reset();
+      document.getElementById('publicInquiryForm').classList.add('hidden');
+      document.getElementById('clientSuccessMsg').classList.remove('hidden');
+    }
+
+    function handleLogout() {
+      document.getElementById('appContent').classList.add('hidden');
+      document.getElementById('loginModal').classList.remove('hidden');
+    }
+
+    function saveInquiry(e) {
+      e.preventDefault();
+      const newInquiry = {
+        id: Date.now(),
+        name: document.getElementById('custName').value,
+        phone: document.getElementById('custPhone').value,
+        source: document.getElementById('custSource').value,
+        details: document.getElementById('custDetails').value,
+        followUp: document.getElementById('custFollowUp').value,
+        status: 'New'
+      };
+      inquiries.unshift(newInquiry);
+      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
+      document.getElementById('inquiryForm').reset();
+      renderTable();
+      updateStats();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('inquiryTableBody');
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      tbody.innerHTML = '';
+
+      const filtered = inquiries.filter(i => 
+        i.name.toLowerCase().includes(search) || 
+        i.phone.toLowerCase().includes(search) || 
+        i.details.toLowerCase().includes(search)
+      );
+
+      filtered.forEach(i => {
+        const row = document.createElement('tr');
+        row.className = 'border-b border-slate-700/50 hover:bg-slate-700/30';
+        row.innerHTML = `
+          <td class="p-3 font-semibold text-white">${i.name}<br><span class="text-xs font-normal text-slate-400">${i.phone}</span></td>
+          <td class="p-3"><span class="px-2 py-1 bg-slate-700 rounded text-xs">${i.source}</span></td>
+          <td class="p-3 max-w-xs truncate">${i.details}</td>
+          <td class="p-3"><span class="text-xs font-mono ${new Date(i.followUp) < new Date() ? 'text-rose-400 font-bold' : 'text-slate-300'}">${i.followUp}</span></td>
+          <td class="p-3">
+            <select onchange="updateStatus(${i.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+              <option value="New" ${i.status === 'New' ? 'selected' : ''}>New</option>
+              <option value="Quote Sent" ${i.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
+              <option value="Followed Up" ${i.status === 'Followed Up' ? 'selected' : ''}>Followed Up</option>
+              <option value="Won" ${i.status === 'Won' ? 'selected' : ''}>Won</option>
+              <option value="Lost" ${i.status === 'Lost' ? 'selected' : ''}>Lost</option>
+            </select>
+          </td>
+          <td class="p-3 text-right">
+            <button onclick="deleteInquiry(${i.id})" class="text-rose-400 hover:text-rose-300 text-xs">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function updateStatus(id, newStatus) {
+      inquiries = inquiries.map(i => i.id === id ? { ...i, status: newStatus } : i);
+      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
+      updateStats();
+    }
+
+    function deleteInquiry(id) {
+      inquiries = inquiries.filter(i => i.id !== id);
+      localStorage.setItem('pack_ground_inquiries', JSON.stringify(inquiries));
+      renderTable();
+      updateStats();
+    }
+
+    function updateStats() {
+      document.getElementById('statTotal').innerText = inquiries.length;
+      document.getElementById('statPending').innerText = inquiries.filter(i => i.status === 'New' || i.status === 'Followed Up').length;
+      document.getElementById('statQuotes').innerText = inquiries.filter(i => i.status === 'Quote Sent').length;
+      document.getElementById('statWon').innerText = inquiries.filter(i => i.status === 'Won').length;
+    }
+
+    function openUserModal() {
+      document.getElementById('userModal').classList.remove('hidden');
+      renderUsers();
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').classList.add('hidden');
+    }
+
+    function handleAddUser(e) {
+      e.preventDefault();
+      const email = document.getElementById('newUserEmail').value;
+      const pass = document.getElementById('newUserPassword').value;
+      users.push({ email: email, pass: pass, role: 'Staff' });
+      localStorage.setItem('pack_ground_users', JSON.stringify(users));
+      document.getElementById('addUserForm').reset();
+      renderUsers();
+    }
+
+    function renderUsers() {
+      const container = document.getElementById('userList');
+      container.innerHTML = users.map(u => `
+        <div class="flex justify-between items-center bg-slate-900 p-2.5 rounded-lg border border-slate-700 text-xs">
+          <div>
+            <p class="font-semibold text-white">${u.email}</p>
+          </div>
+          <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded">${u.role}</span>
+        </div>
+      `).join('');
+    }
+
+    function exportToCSV() {
+      if (!inquiries.length) return alert('No inquiries to export');
+      let csv = 'Customer Name,Phone,Source,Details,FollowUp Date,Status\n';
+      inquiries.forEach(i => {
+        csv += `"${i.name}","${i.phone}","${i.source}","${i.details}","${i.followUp}","${i.status}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'PACK_Ground_Inquiries.csv');
+      a.click();
+    }
+  </script>
+</body>
+</html>
