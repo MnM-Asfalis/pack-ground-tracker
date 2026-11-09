@@ -1,137 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PACK Ground Investments - Client Inquiry Tracker</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Firebase App & Firestore SDKs (Compat Version) -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .bg-crimson { background-color: #9f1239; }
-    .bg-crimson-dark { background-color: #881337; }
-    .text-crimson { color: #9f1239; }
-  </style>
-</head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
-
-  <!-- LOGIN MODAL -->
-  <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
-    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-200 relative overflow-hidden">
-      <div class="h-2 bg-crimson absolute top-0 left-0 right-0"></div>
-      
-      <!-- LOGO -->
-      <div class="flex flex-col items-center mb-6 text-center">
-        <div class="w-24 h-24 rounded-full flex items-center justify-center mb-3 shadow-md border-2 border-slate-100 overflow-hidden bg-white">
-          <img src="Pack Ground Logo.jpeg" alt="PACK Ground Investments Logo" class="w-full h-full object-cover">
-        </div>
-        <h2 class="text-xl font-bold text-slate-900 tracking-tight">PACK GROUND</h2>
-        <p class="text-xs font-semibold tracking-widest text-crimson uppercase">INVESTMENTS</p>
-        <p class="text-xs text-slate-500 mt-1">Staff Portal & Client Inquiry Gateway</p>
-      </div>
-
-      <!-- STAFF LOGIN FORM -->
-      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Staff Email / Username</label>
-          <input type="text" id="loginEmail" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="e.g. admin@packground.co.zw">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
-          <input type="password" id="loginPassword" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter password">
-        </div>
-
-        <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow-md transition duration-200 text-sm flex items-center justify-center gap-2">
-          Staff Login to Dashboard
-        </button>
-      </form>
-
-      <!-- CLIENT INQUIRY BUTTON -->
-      <div class="mt-4 pt-4 border-t border-slate-100">
-        <button type="button" onclick="openClientForm()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs transition shadow flex items-center justify-center gap-2">
-          <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-          </svg>
-          Submit Customer Inquiry (Client Portal)
-        </button>
-      </div>
-
-      <!-- FOOTER & DEVELOPER ATTRIBUTION -->
-      <div class="mt-6 pt-4 border-t border-slate-100 text-center text-[11px] text-slate-500 space-y-1">
-        <p class="font-medium text-slate-600">46 Caledon Avenue, Hatfield, Harare</p>
-        <p>+263 242 586 658 // +263 718 864 757</p>
-        <p class="text-[10px] text-slate-400 font-semibold pt-2 border-t border-slate-100 mt-2">
-          Developed by Asfalis Group 2026 | Phone: +263 772 911 806
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- PUBLIC CLIENT INQUIRY MODAL -->
-  <div id="clientModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden">
-    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-200 relative overflow-hidden">
-      <div class="h-2 bg-crimson absolute top-0 left-0 right-0"></div>
-      
-      <div class="flex justify-between items-center pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-3">
-          <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-200 object-cover">
-          <div>
-            <h3 class="text-base font-bold text-slate-900 leading-tight">PACK GROUND INVESTMENTS</h3>
-            <p class="text-xs text-rose-700 font-medium">Customer Service Request Portal</p>
-          </div>
-        </div>
-        <button onclick="closeClientForm()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
-      </div>
-
-      <form id="publicInquiryForm" onsubmit="submitClientInquiry(event)" class="mt-4 space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
-          <input type="text" id="publicName" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter your full name">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone / WhatsApp Number *</label>
-          <input type="text" id="publicPhone" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="e.g. +263 77 123 4567">
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type of Service / Product Required *</label>
-          <textarea id="publicDetails" rows="3" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Describe the service or product you are looking for..."></textarea>
-        </div>
-
-        <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow transition text-sm">
-          Submit Inquiry to PACK Ground
-        </button>
-      </form>
-
-      <div id="clientSuccessMsg" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-center">
-        <p class="text-emerald-800 font-semibold text-sm">Thank you! Your inquiry has been submitted successfully.</p>
-        <p class="text-xs text-emerald-600 mt-1">Our sales team at PACK Ground Investments will reach out to you shortly.</p>
-        <button onclick="closeClientForm()" class="mt-3 px-4 py-1.5 bg-emerald-700 text-white rounded-lg text-xs font-semibold">Done</button>
-      </div>
-
-      <div class="mt-6 pt-3 border-t border-slate-100 text-center text-[10px] text-slate-400 font-semibold">
-        Developed by Asfalis Group 2026 | Phone: +263 772 911 806
-      </div>
-    </div>
-  </div>
-
-  <!-- MAIN DASHBOARD CONTENT -->
-  <div id="appContent" class="flex-1 flex flex-col hidden">
-    <!-- TOP HEADER -->
-    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between shadow-md">
-      <div class="flex items-center gap-4">
-        <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-600 object-cover">
-        <div>
-          <h1 class="text-lg font-bold text-white leading-tight">PACK GROUND INVESTMENTS</h1>
-          <p id="welcomeUserBanner" class="text-xs text-rose-400 font-medium mt-0.5">Welcome</p>
-        </div>
-      </div>
-
+<!-- ... existing code ... -->
       <div class="flex items-center gap-3">
         <button id="userManagementBtn" onclick="openUserModal()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg border border-slate-600 transition">
           Users & Accounts
@@ -147,141 +14,377 @@
       </div>
     </header>
 
+    <!-- MODULE NAVIGATION TABS -->
+    <div class="bg-slate-900 border-b border-slate-800 px-6 py-2.5">
+      <div class="max-w-7xl mx-auto flex space-x-2 overflow-x-auto text-xs font-semibold">
+        <button onclick="switchAppTab('inquiriesTab')" id="tabBtn-inquiriesTab" class="nav-tab-btn px-4 py-2 rounded-lg bg-crimson text-white flex items-center gap-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Inquiry Tracker
+        </button>
+        <button onclick="switchAppTab('quotationsTab')" id="tabBtn-quotationsTab" class="nav-tab-btn px-4 py-2 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 flex items-center gap-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Quotations & Estimates
+        </button>
+        <button onclick="switchAppTab('invoicesTab')" id="tabBtn-invoicesTab" class="nav-tab-btn px-4 py-2 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 flex items-center gap-2 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Invoices & Confirmed Orders
+        </button>
+      </div>
+    </div>
+
     <!-- CONTENT BODY -->
     <main class="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full">
-      <!-- STATS METRICS -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400 uppercase font-bold">Total Inquiries</p>
-          <h3 id="statTotal" class="text-2xl font-bold text-white mt-1">0</h3>
+
+      <!-- TAB 1: INQUIRIES LOG -->
+      <div id="inquiriesTab" class="app-tab-page space-y-6">
+        <!-- STATS METRICS -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="text-xs text-slate-400 uppercase font-bold">Total Inquiries</p>
+            <h3 id="statTotal" class="text-2xl font-bold text-white mt-1">0</h3>
+          </div>
+
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="text-xs text-slate-400 uppercase font-bold">Pending Follow-Up</p>
+            <h3 id="statPending" class="text-2xl font-bold text-amber-400 mt-1">0</h3>
+          </div>
+
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="text-xs text-slate-400 uppercase font-bold">Quotes Sent</p>
+            <h3 id="statQuotes" class="text-2xl font-bold text-indigo-400 mt-1">0</h3>
+          </div>
+
+          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <p class="text-xs text-slate-400 uppercase font-bold">Jobs Won</p>
+            <h3 id="statWon" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
+          </div>
         </div>
 
-        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400 uppercase font-bold">Pending Follow-Up</p>
-          <h3 id="statPending" class="text-2xl font-bold text-amber-400 mt-1">0</h3>
+        <!-- INQUIRY FORM -->
+        <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400 mb-4">Log New Customer Inquiry (Internal Staff)</h2>
+          <form id="inquiryForm" onsubmit="saveInquiry(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Customer Name *</label>
+              <input type="text" id="custName" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Phone / WhatsApp *</label>
+              <input type="text" id="custPhone" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Inquiry Source *</label>
+              <select id="custSource" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Phone Call">Phone Call</option>
+                <option value="Email">Email</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Verbal / Walk-in">Verbal / Walk-in</option>
+                <option value="Client Portal Web">Client Portal Web</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Inquiry Details *</label>
+              <input type="text" id="custDetails" placeholder="e.g. Sliding Gate, Burglar Bars" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+            </div>
+
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Follow-Up Date *</label>
+              <input type="date" id="custFollowUp" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+            </div>
+
+            <div class="flex items-end">
+              <button type="submit" class="w-full py-2 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-sm transition shadow">
+                Save Inquiry
+              </button>
+            </div>
+          </form>
         </div>
 
-        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400 uppercase font-bold">Quotes Sent</p>
-          <h3 id="statQuotes" class="text-2xl font-bold text-indigo-400 mt-1">0</h3>
-        </div>
+        <!-- TABLE -->
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow">
+          <div class="p-4 bg-slate-800 border-b border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">Logged Inquiries</h2>
+            <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Search..." class="w-full md:w-64 px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200">
+          </div>
 
-        <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-          <p class="text-xs text-slate-400 uppercase font-bold">Jobs Won</p>
-          <h3 id="statWon" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900 text-xs text-slate-400 uppercase font-semibold border-b border-slate-700">
+                <tr>
+                  <th class="p-3">Customer</th>
+                  <th class="p-3">Source</th>
+                  <th class="p-3">Details</th>
+                  <th class="p-3">Follow-Up Date</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inquiryTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- INQUIRY FORM -->
-      <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400 mb-4">Log New Customer Inquiry (Internal Staff)</h2>
-        <form id="inquiryForm" onsubmit="saveInquiry(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Customer Name *</label>
-            <input type="text" id="custName" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+      <!-- TAB 2: QUOTATIONS & ESTIMATES -->
+      <div id="quotationsTab" class="app-tab-page hidden space-y-6">
+        <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-700 pb-4 mb-4 gap-3">
+            <div>
+              <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400">Create Metal Fabrication Quotation</h2>
+              <p class="text-xs text-slate-400">Link an existing inquiry or build a new quotation estimate.</p>
+            </div>
+            <div class="flex items-center gap-2 w-full md:w-auto">
+              <label class="text-xs text-slate-300 font-semibold">Import Inquiry:</label>
+              <select id="quoteInquirySelector" onchange="autoFillFromInquiry()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500">
+                <option value="">-- Select Inquiry --</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Phone / WhatsApp *</label>
-            <input type="text" id="custPhone" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
-          </div>
+          <form id="quoteForm" onsubmit="handleSaveQuote(event)" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Quotation Ref #</label>
+                <input type="text" id="quoteRef" readonly class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs font-mono text-rose-400 font-bold">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Client Name *</label>
+                <input type="text" id="quoteClientName" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Phone / WhatsApp *</label>
+                <input type="text" id="quoteClientPhone" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs text-slate-400 mb-1">Fabrication Subject / Description *</label>
+                <input type="text" id="quoteSubject" placeholder="e.g. 4m Sliding Gate & Palisade Fencing" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              </div>
+              <div>
+                <label class="block text-xs text-slate-400 mb-1">Quote Date</label>
+                <input type="date" id="quoteDate" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              </div>
+            </div>
 
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Inquiry Source *</label>
-            <select id="custSource" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
-              <option value="WhatsApp">WhatsApp</option>
-              <option value="Phone Call">Phone Call</option>
-              <option value="Email">Email</option>
-              <option value="Social Media">Social Media</option>
-              <option value="Verbal / Walk-in">Verbal / Walk-in</option>
-              <option value="Client Portal Web">Client Portal Web</option>
-            </select>
-          </div>
+            <!-- METAL FABRICATION PRESETS -->
+            <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex flex-wrap items-center gap-2">
+              <span class="text-xs font-bold text-slate-400 uppercase mr-1">Fabrication Presets:</span>
+              <button type="button" onclick="addQuoteRow('Mild Steel RHS Tubing (100x50x3mm)', '6m Length', 45)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Steel Tubing</button>
+              <button type="button" onclick="addQuoteRow('Structural MIG/TIG Welding Labor', 'Hours', 25)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Welding Labor</button>
+              <button type="button" onclick="addQuoteRow('Red Oxide Primer & Industrial Paint', 'Sq Meters', 12)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Paint Finish</button>
+              <button type="button" onclick="addQuoteRow('Heavy Duty Hinges & Gate Lock Assembly', 'Set', 35)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Lock Hardware</button>
+              <button type="button" onclick="addQuoteRow('On-Site Installation & Fitting (Harare)', 'Lot', 120)" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs text-slate-200">+ Site Install</button>
+            </div>
 
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Inquiry Details *</label>
-            <input type="text" id="custDetails" placeholder="e.g. Sliding Gate, Burglar Bars" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
-          </div>
+            <!-- LINE ITEMS TABLE -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-900 text-slate-400 uppercase font-semibold border-b border-slate-700">
+                  <tr>
+                    <th class="p-2.5 w-5/12">Item Description</th>
+                    <th class="p-2.5 w-2/12">Unit</th>
+                    <th class="p-2.5 w-1/12 text-center">Qty</th>
+                    <th class="p-2.5 w-2/12 text-right">Unit Price ($)</th>
+                    <th class="p-2.5 w-2/12 text-right">Total ($)</th>
+                    <th class="p-2.5 w-1/12 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="quoteLineItemsBody" class="divide-y divide-slate-700/50"></tbody>
+              </table>
+            </div>
 
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Follow-Up Date *</label>
-            <input type="date" id="custFollowUp" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
-          </div>
+            <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+              <button type="button" onclick="addQuoteRow()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg">
+                + Add Custom Row
+              </button>
 
-          <div class="flex items-end">
-            <button type="submit" class="w-full py-2 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-sm transition shadow">
-              Save Inquiry
-            </button>
-          </div>
-        </form>
-      </div>
+              <div class="w-full md:w-72 bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-2 text-xs">
+                <div class="flex justify-between text-slate-400">
+                  <span>Subtotal:</span>
+                  <span id="quoteSubtotal" class="font-bold text-slate-200">$0.00</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>VAT (15%):</span>
+                  <span id="quoteVat" class="font-bold text-slate-200">$0.00</span>
+                </div>
+                <div class="border-t border-slate-700 pt-2 flex justify-between font-bold text-sm text-white">
+                  <span>Grand Total:</span>
+                  <span id="quoteGrandTotal" class="text-emerald-400">$0.00</span>
+                </div>
+              </div>
+            </div>
 
-      <!-- TABLE -->
-      <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow">
-        <div class="p-4 bg-slate-800 border-b border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">Logged Inquiries</h2>
-          <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Search..." class="w-full md:w-64 px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200">
+            <div class="flex justify-end pt-2">
+              <button type="submit" class="px-6 py-2.5 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-sm shadow transition">
+                Save & Issue Quotation
+              </button>
+            </div>
+          </form>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead class="bg-slate-900 text-xs text-slate-400 uppercase font-semibold border-b border-slate-700">
-              <tr>
-                <th class="p-3">Customer</th>
-                <th class="p-3">Source</th>
-                <th class="p-3">Details</th>
-                <th class="p-3">Follow-Up Date</th>
-                <th class="p-3">Status</th>
-                <th class="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="inquiryTableBody"></tbody>
-          </table>
+        <!-- QUOTATIONS TABLE -->
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow">
+          <div class="p-4 bg-slate-800 border-b border-slate-700">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">Issued Quotations & Order Conversion</h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900 text-xs text-slate-400 uppercase font-semibold border-b border-slate-700">
+                <tr>
+                  <th class="p-3">Ref #</th>
+                  <th class="p-3">Client</th>
+                  <th class="p-3">Subject</th>
+                  <th class="p-3">Total Amount</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="quotationsTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
+
+      <!-- TAB 3: INVOICES & CONFIRMED ORDERS -->
+      <div id="invoicesTab" class="app-tab-page hidden space-y-6">
+        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow">
+          <div class="p-4 bg-slate-800 border-b border-slate-700">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">Tax Invoices & Payment Ledger</h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900 text-xs text-slate-400 uppercase font-semibold border-b border-slate-700">
+                <tr>
+                  <th class="p-3">Invoice #</th>
+                  <th class="p-3">Client</th>
+                  <th class="p-3">Total Amount</th>
+                  <th class="p-3">Payment Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="invoicesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
     </main>
 
     <!-- DASHBOARD DEVELOPER FOOTER -->
-    <footer class="bg-slate-900 py-3 text-center text-xs text-slate-500 border-t border-slate-800">
-      Developed by Asfalis Group 2026 | Phone: +263 772 911 806
-    </footer>
-  </div>
-
+<!-- ... existing code ... -->
   <!-- USER MANAGEMENT MODAL -->
-  <div id="userModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
-    <div class="bg-slate-800 text-slate-100 rounded-2xl shadow-2xl w-full max-w-2xl p-6 border border-slate-700 m-4">
-      <div class="flex justify-between items-center pb-4 border-b border-slate-700">
-        <h3 class="text-lg font-bold text-white">Team User & Account Settings</h3>
-        <button onclick="closeUserModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+<!-- ... existing code ... -->
+
+  <!-- PRINT & PREVIEW DOCUMENT MODAL -->
+  <div id="printDocModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden overflow-y-auto">
+    <div class="bg-white text-slate-900 rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden my-8">
+      <div class="bg-slate-900 text-white p-4 flex justify-between items-center no-print">
+        <h3 id="printModalTitle" class="text-sm font-bold">Document Preview</h3>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-3 py-1.5 bg-crimson hover:bg-crimson-dark text-white rounded text-xs font-semibold flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+            Print / Save PDF
+          </button>
+          <button onclick="closePrintModal()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+        </div>
       </div>
 
-      <div class="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
-        <!-- ADD NEW USER FORM -->
-        <form id="addUserForm" onsubmit="handleAddUser(event)" class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
-          <h4 class="text-xs font-bold text-rose-400 uppercase">Add New Team Account</h4>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <input type="text" id="newUserEmail" placeholder="Email / Username" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
-            <input type="password" id="newUserPassword" placeholder="Password" required class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
-            <select id="newUserRole" class="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-200">
-              <option value="Staff">Staff</option>
-              <option value="Admin">Admin</option>
-            </select>
+      <div id="printableDocument" class="p-8 bg-white text-slate-900 text-xs">
+        <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
+          <div>
+            <h1 class="text-xl font-black text-slate-900 tracking-tight">PACK GROUND INVESTMENTS</h1>
+            <p class="text-[11px] font-bold text-rose-800 uppercase tracking-widest mt-0.5">Metal Fabrication & Structural Steel Specialists</p>
+            <p class="text-[11px] text-slate-500 mt-1">46 Caledon Avenue, Hatfield, Harare, Zimbabwe</p>
+            <p class="text-[11px] text-slate-500">Phone: +263 242 586 658 // +263 718 864 757</p>
           </div>
-          <button type="submit" class="w-full py-2 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-xs transition">Create Account</button>
-        </form>
+          <div class="text-right">
+            <span id="docTypeLabel" class="inline-block bg-slate-900 text-white font-bold px-3 py-1 rounded text-xs uppercase tracking-wider mb-2">QUOTATION</span>
+            <p id="docNumberText" class="font-bold text-sm text-slate-800">#PGI-QT-1001</p>
+            <p id="docDateText" class="text-slate-500">Date: 2026-11-09</p>
+          </div>
+        </div>
 
-        <!-- REGISTERED ACCOUNTS LIST -->
-        <div class="space-y-2">
-          <h4 class="text-xs font-bold text-slate-400 uppercase">Registered Accounts & Credentials Management</h4>
-          <div id="userList" class="space-y-2"></div>
+        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
+          <div>
+            <p class="font-bold text-slate-400 uppercase text-[10px]">Client / Billed To:</p>
+            <p id="docClientName" class="font-bold text-slate-900 text-sm mt-0.5">Client Name</p>
+            <p id="docClientPhone" class="text-slate-600">Contact Details</p>
+          </div>
+          <div>
+            <p class="font-bold text-slate-400 uppercase text-[10px]">Fabrication Subject:</p>
+            <p id="docSubjectText" class="font-semibold text-slate-800 mt-0.5">Steel Fabrication Works</p>
+          </div>
+        </div>
+
+        <table class="w-full text-left border-collapse border border-slate-200 mb-6 text-xs">
+          <thead class="bg-slate-900 text-white uppercase font-bold text-[10px]">
+            <tr>
+              <th class="p-2.5">Item Description</th>
+              <th class="p-2.5">Unit</th>
+              <th class="p-2.5 text-center">Qty</th>
+              <th class="p-2.5 text-right">Unit Price</th>
+              <th class="p-2.5 text-right">Total ($)</th>
+            </tr>
+          </thead>
+          <tbody id="docItemsBody" class="divide-y divide-slate-200"></tbody>
+        </table>
+
+        <div class="flex justify-end mb-8">
+          <div class="w-64 space-y-1.5 text-xs bg-slate-50 p-3 rounded border border-slate-200">
+            <div class="flex justify-between text-slate-600">
+              <span>Subtotal:</span>
+              <span id="docSubtotal" class="font-bold text-slate-800">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>VAT (15%):</span>
+              <span id="docVat" class="font-bold text-slate-800">$0.00</span>
+            </div>
+            <div class="border-t border-slate-800 pt-1.5 flex justify-between font-bold text-sm text-slate-900">
+              <span>Grand Total:</span>
+              <span id="docGrandTotal" class="text-rose-800">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-4 text-[11px] text-slate-600 space-y-1">
+          <p class="font-bold text-slate-800">Standard Execution & Payment Terms:</p>
+          <p>• 50% deposit required upon order confirmation to initiate material procurement.</p>
+          <p>• 40% milestone payment upon completion of factory assembly prior to delivery.</p>
+          <p>• 10% balance due upon site installation and final sign-off.</p>
+          <p>• Banking Details: PACK Ground Investments | Standard Chartered / CBZ Bank Harare.</p>
+        </div>
+
+        <div class="mt-12 flex justify-between items-end text-xs pt-4 border-t border-dashed border-slate-300">
+          <div>
+            <p class="font-bold text-slate-800">Authorized Signature (PGI)</p>
+            <p class="text-slate-400 mt-8">_______________________________</p>
+            <p class="text-slate-600 mt-1">Elton Chitura - Director</p>
+          </div>
+          <div class="text-right">
+            <p class="font-bold text-slate-800">Client Acceptance Signature</p>
+            <p class="text-slate-400 mt-8">_______________________________</p>
+            <p class="text-slate-600 mt-1">Date: ____ / ____ / 2026</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <style>
+    @media print {
+      body * { visibility: hidden; }
+      #printableDocument, #printableDocument * { visibility: visible; }
+      #printableDocument { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; }
+      .no-print { display: none !important; }
+    }
+  </style>
+
   <script>
     // ==========================================
-    // FIREBASE CLOUD CONFIGURATION
+    // FIREBASE CLOUD CONFIGURATION & SAFEGUARD
     // ==========================================
     const firebaseConfig = {
       apiKey: "AIzaSyBwLjWo5yY4YRY5noKQZqhTiNLB8PYcTLo",
@@ -292,33 +395,52 @@
       appId: "1:199008755535:web:50b0064769705d254caf3a"
     };
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
+    let db;
     let users = [];
     let inquiries = [];
+    let quotations = [];
+    let invoices = [];
     let currentUser = null;
+
+    // Initialize Firebase once DOM & scripts are fully loaded
+    window.addEventListener('DOMContentLoaded', () => {
+      if (typeof firebase !== 'undefined') {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.firestore();
+        initDatabase();
+      } else {
+        console.error('Firebase SDK failed to load from CDN.');
+      }
+    });
 
     // Seed default admin accounts if database is empty, then load real-time data
     async function initDatabase() {
-      const usersSnap = await db.collection('users').get();
-      if (usersSnap.empty) {
-        const defaultUsers = [
-          { email: 'admin@packground.co.zw', pass: 'packground2026', role: 'Admin', status: 'Active' },
-          { email: 'Ziyambi', pass: 'packground2026', role: 'Staff', status: 'Active' },
-          { email: 'Elton', pass: 'packground2026', role: 'Staff', status: 'Active' },
-          { email: 'Chiedza', pass: 'packground2026', role: 'Staff', status: 'Active' }
-        ];
-        for (let u of defaultUsers) {
-          await db.collection('users').add(u);
+      if (!db) return;
+      try {
+        const usersSnap = await db.collection('users').get();
+        if (usersSnap.empty) {
+          const defaultUsers = [
+            { email: 'admin@packground.co.zw', pass: 'packground2026', role: 'Admin', status: 'Active' },
+            { email: 'Ziyambi', pass: 'packground2026', role: 'Staff', status: 'Active' },
+            { email: 'Elton', pass: 'packground2026', role: 'Staff', status: 'Active' },
+            { email: 'Chiedza', pass: 'packground2026', role: 'Staff', status: 'Active' }
+          ];
+          for (let u of defaultUsers) {
+            await db.collection('users').add(u);
+          }
         }
+        loadRealtimeData();
+        initQuoteForm();
+      } catch (err) {
+        console.error('Database initialization error:', err);
       }
-      loadRealtimeData();
     }
 
     // Real-time synchronization listeners for live updates across phone & laptop
     function loadRealtimeData() {
+      if (!db) return;
       db.collection('users').onSnapshot(snapshot => {
         users = [];
         snapshot.forEach(doc => {
@@ -336,239 +458,271 @@
         });
         renderTable();
         updateStats();
+        populateInquiryDropdown();
+      });
+
+      db.collection('quotations').onSnapshot(snapshot => {
+        quotations = [];
+        snapshot.forEach(doc => {
+          quotations.push({ docId: doc.id, ...doc.data() });
+        });
+        renderQuotationsTable();
+      });
+
+      db.collection('invoices').onSnapshot(snapshot => {
+        invoices = [];
+        snapshot.forEach(doc => {
+          invoices.push({ docId: doc.id, ...doc.data() });
+        });
+        renderInvoicesTable();
       });
     }
 
-    initDatabase();
+    // Tab Switching Functionality
+    function switchAppTab(tabId) {
+      document.querySelectorAll('.app-tab-page').forEach(page => page.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+        btn.classList.remove('bg-crimson', 'text-white');
+        btn.classList.add('bg-slate-800', 'text-slate-400');
+      });
 
-    async function handleLogin(e) {
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('tabBtn-' + tabId);
+      activeBtn.classList.add('bg-crimson', 'text-white');
+      activeBtn.classList.remove('bg-slate-800', 'text-slate-400');
+    }
+
+    // --- QUOTATION BUILDER LOGIC ---
+    function initQuoteForm() {
+      document.getElementById('quoteRef').value = 'PGI-QT-' + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('quoteDate').value = new Date().toISOString().split('T')[0];
+      const tbody = document.getElementById('quoteLineItemsBody');
+      if (tbody) {
+        tbody.innerHTML = '';
+        addQuoteRow();
+      }
+    }
+
+    function populateInquiryDropdown() {
+      const select = document.getElementById('quoteInquirySelector');
+      if (!select) return;
+      select.innerHTML = '<option value="">-- Select Inquiry --</option>';
+      inquiries.forEach(inq => {
+        select.innerHTML += `<option value="${inq.docId}">${inq.name} - ${inq.details}</option>`;
+      });
+    }
+
+    function autoFillFromInquiry() {
+      const docId = document.getElementById('quoteInquirySelector').value;
+      const inq = inquiries.find(i => i.docId === docId);
+      if (inq) {
+        document.getElementById('quoteClientName').value = inq.name;
+        document.getElementById('quoteClientPhone').value = inq.phone;
+        document.getElementById('quoteSubject').value = inq.details;
+      }
+    }
+
+    function addQuoteRow(desc = '', unit = 'Unit', price = 0) {
+      const tbody = document.getElementById('quoteLineItemsBody');
+      const tr = document.createElement('tr');
+      tr.className = 'item-row';
+      tr.innerHTML = `
+        <td class="p-2"><input type="text" value="${desc}" placeholder="Item description..." class="item-desc w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200"></td>
+        <td class="p-2"><input type="text" value="${unit}" class="item-unit w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200"></td>
+        <td class="p-2"><input type="number" value="1" min="1" onchange="calcQuoteTotals()" class="item-qty w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-center text-slate-200"></td>
+        <td class="p-2"><input type="number" value="${price}" min="0" step="0.01" onchange="calcQuoteTotals()" class="item-price w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-right text-slate-200"></td>
+        <td class="p-2 text-right font-bold text-xs text-emerald-400 item-total">$0.00</td>
+        <td class="p-2 text-center"><button type="button" onclick="this.closest('tr').remove(); calcQuoteTotals();" class="text-rose-400 hover:text-rose-300">✕</button></td>
+      `;
+      tbody.appendChild(tr);
+      calcQuoteTotals();
+    }
+
+    function calcQuoteTotals() {
+      let subtotal = 0;
+      document.querySelectorAll('#quoteLineItemsBody tr').forEach(row => {
+        const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+        const total = qty * price;
+        row.querySelector('.item-total').innerText = '$' + total.toFixed(2);
+        subtotal += total;
+      });
+
+      const vat = subtotal * 0.15;
+      const grandTotal = subtotal + vat;
+
+      document.getElementById('quoteSubtotal').innerText = '$' + subtotal.toFixed(2);
+      document.getElementById('quoteVat').innerText = '$' + vat.toFixed(2);
+      document.getElementById('quoteGrandTotal').innerText = '$' + grandTotal.toFixed(2);
+    }
+
+    async function handleSaveQuote(e) {
       e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      const pass = document.getElementById('loginPassword').value.trim();
+      const items = [];
+      document.querySelectorAll('#quoteLineItemsBody tr').forEach(row => {
+        items.push({
+          desc: row.querySelector('.item-desc').value,
+          unit: row.querySelector('.item-unit').value,
+          qty: parseFloat(row.querySelector('.item-qty').value) || 0,
+          price: parseFloat(row.querySelector('.item-price').value) || 0,
+          total: (parseFloat(row.querySelector('.item-qty').value) || 0) * (parseFloat(row.querySelector('.item-price').value) || 0)
+        });
+      });
 
-      const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
-      
-      if (!found) {
-        alert('Invalid Staff Credentials. Please check your username and password.');
-        return;
-      }
+      const subtotal = items.reduce((s, i) => s + i.total, 0);
+      const vat = subtotal * 0.15;
+      const grandTotal = subtotal + vat;
 
-      if (found.status === 'Archived') {
-        alert('Access Denied: This account has been archived. Please contact an administrator.');
-        return;
-      }
-
-      currentUser = found;
-      document.getElementById('loginModal').classList.add('hidden');
-      document.getElementById('appContent').classList.remove('hidden');
-
-      // Display Welcome message with Role and Username on top header
-      document.getElementById('welcomeUserBanner').innerText = `Welcome, ${currentUser.role} - ${currentUser.email}`;
-
-      // Restrict user management button if logged in user is Staff
-      if (currentUser.role !== 'Admin') {
-        document.getElementById('userManagementBtn').style.display = 'none';
-      } else {
-        document.getElementById('userManagementBtn').style.display = 'block';
-      }
-    }
-
-    function handleLogout() {
-      currentUser = null;
-      document.getElementById('appContent').classList.add('hidden');
-      document.getElementById('loginModal').classList.remove('hidden');
-      document.getElementById('loginForm').reset();
-    }
-
-    function openClientForm() {
-      document.getElementById('clientModal').classList.remove('hidden');
-      document.getElementById('publicInquiryForm').classList.remove('hidden');
-      document.getElementById('clientSuccessMsg').classList.add('hidden');
-    }
-
-    function closeClientForm() {
-      document.getElementById('clientModal').classList.add('hidden');
-    }
-
-    async function submitClientInquiry(e) {
-      e.preventDefault();
-      const today = new Date().toISOString().split('T')[0];
-      const newInquiry = {
-        id: Date.now(),
-        name: document.getElementById('publicName').value,
-        phone: document.getElementById('publicPhone').value,
-        source: 'Client Portal Web',
-        details: document.getElementById('publicDetails').value,
-        followUp: today,
-        status: 'New'
+      const quoteObj = {
+        ref: document.getElementById('quoteRef').value,
+        client: document.getElementById('quoteClientName').value,
+        phone: document.getElementById('quoteClientPhone').value,
+        subject: document.getElementById('quoteSubject').value,
+        date: document.getElementById('quoteDate').value,
+        items: items,
+        subtotal: subtotal,
+        vat: vat,
+        grandTotal: grandTotal,
+        status: 'Sent to Client'
       };
 
-      await db.collection('inquiries').add(newInquiry);
-      
-      document.getElementById('publicInquiryForm').reset();
-      document.getElementById('publicInquiryForm').classList.add('hidden');
-      document.getElementById('clientSuccessMsg').classList.remove('hidden');
+      await db.collection('quotations').add(quoteObj);
+
+      // Link status back to inquiry if selected
+      const selectedInqDocId = document.getElementById('quoteInquirySelector').value;
+      if (selectedInqDocId) {
+        await db.collection('inquiries').doc(selectedInqDocId).update({ status: 'Quote Sent' });
+      }
+
+      openPrintModal('Quotation', quoteObj);
+      initQuoteForm();
     }
 
-    async function saveInquiry(e) {
-      e.preventDefault();
-      const newInquiry = {
-        id: Date.now(),
-        name: document.getElementById('custName').value,
-        phone: document.getElementById('custPhone').value,
-        source: document.getElementById('custSource').value,
-        details: document.getElementById('custDetails').value,
-        followUp: document.getElementById('custFollowUp').value,
-        status: 'New'
-      };
-      await db.collection('inquiries').add(newInquiry);
-      document.getElementById('inquiryForm').reset();
-    }
-
-    function renderTable() {
-      const tbody = document.getElementById('inquiryTableBody');
+    function renderQuotationsTable() {
+      const tbody = document.getElementById('quotationsTableBody');
       if (!tbody) return;
-      const search = document.getElementById('searchInput').value.toLowerCase();
       tbody.innerHTML = '';
 
-      const filtered = inquiries.filter(i => 
-        i.name.toLowerCase().includes(search) || 
-        i.phone.toLowerCase().includes(search) || 
-        i.details.toLowerCase().includes(search)
-      );
+      quotations.forEach(q => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-slate-700/50 hover:bg-slate-700/30';
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-rose-400">${q.ref}</td>
+          <td class="p-3 font-semibold text-white">${q.client}</td>
+          <td class="p-3 text-xs">${q.subject}</td>
+          <td class="p-3 font-bold text-emerald-400">$${q.grandTotal.toFixed(2)}</td>
+          <td class="p-3"><span class="px-2 py-1 text-xs rounded ${q.status === 'Confirmed Order' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">${q.status}</span></td>
+          <td class="p-3 text-right space-x-2">
+            ${q.status !== 'Confirmed Order' ? `
+              <button onclick="confirmOrder('${q.docId}')" class="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-semibold">Confirm Order</button>
+            ` : ''}
+            <button onclick="openPrintModal('Quotation', getQuoteByDocId('${q.docId}'))" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-xs">Print</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
-      filtered.forEach(i => {
-        const row = document.createElement('tr');
-        row.className = 'border-b border-slate-700/50 hover:bg-slate-700/30';
-        row.innerHTML = `
-          <td class="p-3 font-semibold text-white">${i.name}<br><span class="text-xs font-normal text-slate-400">${i.phone}</span></td>
-          <td class="p-3"><span class="px-2 py-1 bg-slate-700 rounded text-xs">${i.source}</span></td>
-          <td class="p-3 max-w-xs truncate">${i.details}</td>
-          <td class="p-3"><span class="text-xs font-mono ${new Date(i.followUp) < new Date() ? 'text-rose-400 font-bold' : 'text-slate-300'}">${i.followUp}</span></td>
+    function getQuoteByDocId(docId) { return quotations.find(q => q.docId === docId); }
+
+    async function confirmOrder(docId) {
+      const q = quotations.find(item => item.docId === docId);
+      if (!q) return;
+
+      await db.collection('quotations').doc(docId).update({ status: 'Confirmed Order' });
+
+      // Update matching inquiry to Won
+      const matchingInq = inquiries.find(i => i.name.toLowerCase() === q.client.toLowerCase());
+      if (matchingInq) {
+        await db.collection('inquiries').doc(matchingInq.docId).update({ status: 'Won' });
+      }
+
+      // Generate Tax Invoice automatiquement
+      const newInv = {
+        invNum: 'INV-' + Math.floor(1000 + Math.random() * 9000),
+        quoteRef: q.ref,
+        client: q.client,
+        phone: q.phone,
+        subject: q.subject,
+        date: new Date().toISOString().split('T')[0],
+        items: q.items,
+        subtotal: q.subtotal,
+        vat: q.vat,
+        grandTotal: q.grandTotal,
+        paymentStatus: '50% Deposit Paid'
+      };
+
+      await db.collection('invoices').add(newInv);
+      switchAppTab('invoicesTab');
+      alert(`Order ${q.ref} officially confirmed! Invoice auto-generated.`);
+    }
+
+    function renderInvoicesTable() {
+      const tbody = document.getElementById('invoicesTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      invoices.forEach(inv => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-slate-700/50 hover:bg-slate-700/30';
+        tr.innerHTML = `
+          <td class="p-3 font-mono font-bold text-rose-400">${inv.invNum}</td>
+          <td class="p-3 font-semibold text-white">${inv.client}</td>
+          <td class="p-3 font-bold text-emerald-400">$${inv.grandTotal.toFixed(2)}</td>
           <td class="p-3">
-            <select onchange="updateStatus('${i.docId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
-              <option value="New" ${i.status === 'New' ? 'selected' : ''}>New</option>
-              <option value="Quote Sent" ${i.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
-              <option value="Followed Up" ${i.status === 'Followed Up' ? 'selected' : ''}>Followed Up</option>
-              <option value="Won" ${i.status === 'Won' ? 'selected' : ''}>Won</option>
-              <option value="Lost" ${i.status === 'Lost' ? 'selected' : ''}>Lost</option>
+            <select onchange="updatePaymentStatus('${inv.docId}', this.value)" class="bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
+              <option value="Unpaid" ${inv.paymentStatus === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
+              <option value="50% Deposit Paid" ${inv.paymentStatus === '50% Deposit Paid' ? 'selected' : ''}>50% Deposit Paid</option>
+              <option value="Fully Paid" ${inv.paymentStatus === 'Fully Paid' ? 'selected' : ''}>Fully Paid</option>
             </select>
           </td>
           <td class="p-3 text-right">
-            <button onclick="deleteInquiry('${i.docId}')" class="text-rose-400 hover:text-rose-300 text-xs">Delete</button>
+            <button onclick="openPrintModal('Tax Invoice', getInvoiceByDocId('${inv.docId}'))" class="px-3 py-1 bg-crimson hover:bg-crimson-dark text-white rounded text-xs font-semibold">Print Tax Invoice</button>
           </td>
         `;
-        tbody.appendChild(row);
+        tbody.appendChild(tr);
       });
     }
 
-    async function updateStatus(docId, newStatus) {
-      await db.collection('inquiries').doc(docId).update({ status: newStatus });
+    function getInvoiceByDocId(docId) { return invoices.find(i => i.docId === docId); }
+
+    async function updatePaymentStatus(docId, newStatus) {
+      await db.collection('invoices').doc(docId).update({ paymentStatus: newStatus });
     }
 
-    async function deleteInquiry(docId) {
-      await db.collection('inquiries').doc(docId).delete();
-    }
+    function openPrintModal(docType, docData) {
+      if (!docData) return;
+      document.getElementById('printModalTitle').innerText = `Preview ${docType}: ${docData.ref || docData.invNum}`;
+      document.getElementById('docTypeLabel').innerText = docType;
+      document.getElementById('docNumberText').innerText = '#' + (docData.ref || docData.invNum);
+      document.getElementById('docDateText').innerText = 'Date: ' + docData.date;
+      document.getElementById('docClientName').innerText = docData.client;
+      document.getElementById('docClientPhone').innerText = docData.phone || 'N/A';
+      document.getElementById('docSubjectText').innerText = docData.subject;
 
-    function updateStats() {
-      if (document.getElementById('statTotal')) {
-        document.getElementById('statTotal').innerText = inquiries.length;
-        document.getElementById('statPending').innerText = inquiries.filter(i => i.status === 'New' || i.status === 'Followed Up').length;
-        document.getElementById('statQuotes').innerText = inquiries.filter(i => i.status === 'Quote Sent').length;
-        document.getElementById('statWon').innerText = inquiries.filter(i => i.status === 'Won').length;
-      }
-    }
-
-    function openUserModal() {
-      if (!currentUser || currentUser.role !== 'Admin') {
-        alert('Unauthorized: Only administrators can manage users.');
-        return;
-      }
-      document.getElementById('userModal').classList.remove('hidden');
-      renderUsers();
-    }
-
-    function closeUserModal() {
-      document.getElementById('userModal').classList.add('hidden');
-    }
-
-    async function handleAddUser(e) {
-      e.preventDefault();
-      const email = document.getElementById('newUserEmail').value.trim();
-      const pass = document.getElementById('newUserPassword').value.trim();
-      const role = document.getElementById('newUserRole').value;
-
-      if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-        alert('An account with this username/email already exists.');
-        return;
-      }
-
-      await db.collection('users').add({ email: email, pass: pass, role: role, status: 'Active' });
-      document.getElementById('addUserForm').reset();
-    }
-
-    async function updateUserRole(docId, newRole) {
-      await db.collection('users').doc(docId).update({ role: newRole });
-    }
-
-    async function updateUserPassword(docId, index) {
-      const newPass = document.getElementById(`passInput_${index}`).value.trim();
-      if (!newPass) {
-        alert('Please enter a new password.');
-        return;
-      }
-      await db.collection('users').doc(docId).update({ pass: newPass });
-      document.getElementById(`passInput_${index}`).value = '';
-      alert('Password successfully updated.');
-    }
-
-    async function toggleUserArchive(docId, currentStatus, userEmail) {
-      if (userEmail === currentUser.email) {
-        alert('You cannot archive your own currently logged-in admin account.');
-        return;
-      }
-      const newStatus = currentStatus === 'Archived' ? 'Active' : 'Archived';
-      await db.collection('users').doc(docId).update({ status: newStatus });
-    }
-
-    function renderUsers() {
-      const container = document.getElementById('userList');
-      if (!container) return;
-      container.innerHTML = users.map((u, index) => `
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 p-3 rounded-lg border ${u.status === 'Archived' ? 'border-rose-900/50 opacity-60' : 'border-slate-700'} gap-3 text-xs">
-          <div>
-            <p class="font-semibold text-white text-sm">${u.email} ${u.status === 'Archived' ? '<span class="text-rose-400 text-[10px] uppercase font-bold">(Archived)</span>' : ''}</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-            <input type="text" id="passInput_${index}" placeholder="New password" class="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-xs text-slate-200 w-28">
-            <button onclick="updateUserPassword('${u.id}', ${index})" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded font-semibold">Update Pwd</button>
-            
-            <select onchange="updateUserRole('${u.id}', this.value)" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs text-slate-200">
-              <option value="Staff" ${u.role === 'Staff' ? 'selected' : ''}>Staff</option>
-              <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
-            </select>
-
-            <button onclick="toggleUserArchive('${u.id}', '${u.status}', '${u.email}')" class="px-2.5 py-1 rounded text-xs font-semibold ${u.status === 'Archived' ? 'bg-emerald-800 hover:bg-emerald-700 text-white' : 'bg-rose-900/80 hover:bg-rose-800 text-rose-200'}">
-              ${u.status === 'Archived' ? 'Restore' : 'Archive'}
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function exportToCSV() {
-      if (!inquiries.length) return alert('No inquiries to export');
-      let csv = 'Customer Name,Phone,Source,Details,FollowUp Date,Status\n';
-      inquiries.forEach(i => {
-        csv += `"${i.name}","${i.phone}","${i.source}","${i.details}","${i.followUp}","${i.status}"\n`;
+      const tbody = document.getElementById('docItemsBody');
+      tbody.innerHTML = '';
+      docData.items.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="p-2.5 font-medium text-slate-800">${item.desc}</td>
+          <td class="p-2.5 text-slate-600">${item.unit}</td>
+          <td class="p-2.5 text-center font-bold">${item.qty}</td>
+          <td class="p-2.5 text-right text-slate-600">$${parseFloat(item.price).toFixed(2)}</td>
+          <td class="p-2.5 text-right font-bold text-slate-900">$${parseFloat(item.total).toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
       });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('href', url);
-      a.setAttribute('download', 'PACK_Ground_Inquiries.csv');
-      a.click();
+
+      document.getElementById('docSubtotal').innerText = '$' + docData.subtotal.toFixed(2);
+      document.getElementById('docVat').innerText = '$' + docData.vat.toFixed(2);
+      document.getElementById('docGrandTotal').innerText = '$' + docData.grandTotal.toFixed(2);
+
+      document.getElementById('printDocModal').classList.remove('hidden');
+    }
+
+    function closePrintModal() {
+      document.getElementById('printDocModal').classList.add('hidden');
     }
   </script>
-</body>
-</html>
+<!-- ... existing code ... -->
