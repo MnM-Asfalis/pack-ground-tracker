@@ -1,71 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PACK Ground Investments - Client Inquiry & Invoicing Portal</title>
-  
-  <!-- Tailwind CSS CDN -->
+
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Firebase App & Firestore SDKs (Compat Version) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    body { font-family: 'Inter', sans-serif; }
-    .bg-crimson { background-color: #9f1239; }
-    .bg-crimson-dark { background-color: #881337; }
-    .text-crimson { color: #9f1239; }
-    .border-crimson { border-color: #9f1239; }
-  </style>
+
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
-
   <!-- LOGIN MODAL -->
-  <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4">
-    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-8 border border-slate-200 relative overflow-hidden">
-      <div class="h-2 bg-crimson absolute top-0 left-0 right-0"></div>
-      
-      <!-- LOGO -->
+  <div id="loginModal" class="modal-shell">
+    <div class="login-card">
+      <div class="brand-bar"></div>
+
       <div class="flex flex-col items-center mb-6 text-center">
-        <div class="w-24 h-24 rounded-full flex items-center justify-center mb-3 shadow-md border-2 border-slate-100 overflow-hidden bg-white">
-          <img src="Pack Ground Logo.jpeg" alt="PACK Ground Investments Logo" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/9f1239/ffffff?text=PGI'">
+        <div class="logo-wrap">
+          <img src="Pack Ground Logo.jpeg" alt="PACK Ground Investments Logo" class="logo-img" onerror="this.src='https://placehold.co/100x100/9f1239/ffffff?text=PGI'">
         </div>
         <h2 class="text-xl font-bold text-slate-900 tracking-tight">PACK GROUND</h2>
         <p class="text-xs font-semibold tracking-widest text-crimson uppercase">INVESTMENTS</p>
         <p class="text-xs text-slate-500 mt-1">Staff Portal & Client Inquiry Gateway</p>
       </div>
 
-      <!-- STAFF LOGIN FORM -->
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Staff Email / Username</label>
-          <input type="text" id="loginEmail" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="e.g. admin@packground.co.zw">
+          <input type="text" id="loginEmail" required class="field-input" placeholder="e.g. admin@packground.co.zw">
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
-          <input type="password" id="loginPassword" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter password">
+          <input type="password" id="loginPassword" required class="field-input" placeholder="Enter password">
         </div>
 
-        <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow-md transition duration-200 text-sm flex items-center justify-center gap-2">
+        <button type="submit" class="btn btn-crimson w-full">
           Staff Login to Dashboard
         </button>
       </form>
 
-      <!-- CLIENT INQUIRY BUTTON -->
       <div class="mt-4 pt-4 border-t border-slate-100">
-        <button type="button" onclick="openClientForm()" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-lg text-xs transition shadow flex items-center justify-center gap-2">
-          <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-          </svg>
+        <button type="button" onclick="openClientForm()" class="btn btn-dark w-full">
           Submit Customer Inquiry (Client Portal)
         </button>
       </div>
 
-      <!-- FOOTER & DEVELOPER ATTRIBUTION -->
       <div class="mt-6 pt-4 border-t border-slate-100 text-center text-[11px] text-slate-500 space-y-1">
         <p class="font-medium text-slate-600">46 Caledon Avenue, Hatfield, Harare</p>
         <p>+263 242 586 658 // +263 718 864 757</p>
@@ -77,10 +59,10 @@
   </div>
 
   <!-- PUBLIC CLIENT INQUIRY MODAL -->
-  <div id="clientModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden">
-    <div class="bg-white text-slate-800 rounded-2xl shadow-2xl w-full max-w-lg p-6 border border-slate-200 relative overflow-hidden">
-      <div class="h-2 bg-crimson absolute top-0 left-0 right-0"></div>
-      
+  <div id="clientModal" class="modal-shell hidden">
+    <div class="client-card">
+      <div class="brand-bar"></div>
+
       <div class="flex justify-between items-center pb-3 border-b border-slate-100">
         <div class="flex items-center gap-3">
           <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-200 object-cover" onerror="this.src='https://placehold.co/100x100/9f1239/ffffff?text=PGI'">
@@ -95,20 +77,20 @@
       <form id="publicInquiryForm" onsubmit="submitClientInquiry(event)" class="mt-4 space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name *</label>
-          <input type="text" id="publicName" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Enter your full name">
+          <input type="text" id="publicName" required class="field-input" placeholder="Enter your full name">
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone / WhatsApp Number *</label>
-          <input type="text" id="publicPhone" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="e.g. +263 77 123 4567">
+          <input type="text" id="publicPhone" required class="field-input" placeholder="e.g. +263 77 123 4567">
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type of Service / Product Required *</label>
-          <textarea id="publicDetails" rows="3" required class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500 text-slate-800 text-sm" placeholder="Describe the service or product you are looking for..."></textarea>
+          <textarea id="publicDetails" rows="3" required class="field-input" placeholder="Describe the service or product you are looking for..."></textarea>
         </div>
 
-        <button type="submit" class="w-full py-3 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg shadow transition text-sm">
+        <button type="submit" class="btn btn-crimson w-full">
           Submit Inquiry to PACK Ground
         </button>
       </form>
@@ -125,10 +107,9 @@
     </div>
   </div>
 
-  <!-- MAIN DASHBOARD CONTENT -->
+  <!-- MAIN APP -->
   <div id="appContent" class="flex-1 flex flex-col hidden">
-    <!-- TOP HEADER -->
-    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between shadow-md">
+    <header class="topbar">
       <div class="flex items-center gap-4">
         <img src="Pack Ground Logo.jpeg" alt="Logo" class="w-10 h-10 rounded-full border border-slate-600 object-cover" onerror="this.src='https://placehold.co/100x100/9f1239/ffffff?text=PGI'">
         <div>
@@ -138,89 +119,81 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- GRAPHICAL ANALYTICS DASHBOARD BUTTON -->
-        <button onclick="openAnalyticsModal()" class="px-3 py-1.5 bg-indigo-700 hover:bg-indigo-600 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-1.5">
-          <svg class="w-4 h-4 text-indigo-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <button onclick="openAnalyticsModal()" class="btn btn-indigo">
           Visual Analytics
         </button>
 
-        <button id="userManagementBtn" onclick="openUserModal()" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-lg border border-slate-600 transition">
+        <button id="userManagementBtn" onclick="openUserModal()" class="btn btn-slate">
           Users & Accounts
         </button>
 
-        <button onclick="exportToCSV()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg shadow transition">
+        <button onclick="exportToCSV()" class="btn btn-emerald">
           Export CSV
         </button>
 
-        <button onclick="handleLogout()" class="px-3 py-1.5 bg-rose-950/60 hover:bg-rose-900 text-rose-200 text-xs font-semibold rounded-lg border border-rose-800 transition">
+        <button onclick="handleLogout()" class="btn btn-rose">
           Logout
         </button>
       </div>
     </header>
 
-    <!-- MODULE NAVIGATION TABS -->
     <div class="bg-slate-900 border-b border-slate-800 px-6 py-2.5">
       <div class="max-w-7xl mx-auto flex space-x-2 overflow-x-auto text-xs font-semibold">
-        <button onclick="switchAppTab('inquiriesTab')" id="tabBtn-inquiriesTab" class="nav-tab-btn px-4 py-2 rounded-lg bg-crimson text-white flex items-center gap-2 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <button onclick="switchAppTab('inquiriesTab')" id="tabBtn-inquiriesTab" class="nav-tab-btn active-tab">
           Inquiry Tracker
         </button>
-        <button onclick="switchAppTab('quotationsTab')" id="tabBtn-quotationsTab" class="nav-tab-btn px-4 py-2 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 flex items-center gap-2 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+
+        <button onclick="switchAppTab('quotationsTab')" id="tabBtn-quotationsTab" class="nav-tab-btn">
           Quotations & Estimates
         </button>
-        <button onclick="switchAppTab('invoicesTab')" id="tabBtn-invoicesTab" class="nav-tab-btn px-4 py-2 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200 flex items-center gap-2 transition">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+
+        <button onclick="switchAppTab('invoicesTab')" id="tabBtn-invoicesTab" class="nav-tab-btn">
           Invoices & Confirmed Orders
         </button>
       </div>
     </div>
 
-    <!-- CONTENT BODY -->
     <main class="flex-1 p-6 space-y-6 max-w-7xl mx-auto w-full">
-
-      <!-- TAB 1: INQUIRIES LOG -->
+      <!-- INQUIRIES -->
       <div id="inquiriesTab" class="app-tab-page space-y-6">
-        <!-- STATS METRICS -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-            <p class="text-xs text-slate-400 uppercase font-bold">Total Inquiries</p>
-            <h3 id="statTotal" class="text-2xl font-bold text-white mt-1">0</h3>
+          <div class="panel">
+            <p class="stat-label">Total Inquiries</p>
+            <h3 id="statTotal" class="stat-value">0</h3>
           </div>
 
-          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-            <p class="text-xs text-slate-400 uppercase font-bold">Pending Follow-Up</p>
-            <h3 id="statPending" class="text-2xl font-bold text-amber-400 mt-1">0</h3>
+          <div class="panel">
+            <p class="stat-label">Pending Follow-Up</p>
+            <h3 id="statPending" class="stat-value text-amber-400">0</h3>
           </div>
 
-          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-            <p class="text-xs text-slate-400 uppercase font-bold">Quotes Sent</p>
-            <h3 id="statQuotes" class="text-2xl font-bold text-indigo-400 mt-1">0</h3>
+          <div class="panel">
+            <p class="stat-label">Quotes Sent</p>
+            <h3 id="statQuotes" class="stat-value text-indigo-400">0</h3>
           </div>
 
-          <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
-            <p class="text-xs text-slate-400 uppercase font-bold">Jobs Won</p>
-            <h3 id="statWon" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
+          <div class="panel">
+            <p class="stat-label">Jobs Won</p>
+            <h3 id="statWon" class="stat-value text-emerald-400">0</h3>
           </div>
         </div>
 
-        <!-- INQUIRY FORM -->
-        <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400 mb-4">Log New Customer Inquiry (Internal Staff)</h2>
+        <div class="panel p-5">
+          <h2 class="section-title">Log New Customer Inquiry (Internal Staff)</h2>
           <form id="inquiryForm" onsubmit="saveInquiry(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block text-xs text-slate-400 mb-1">Customer Name *</label>
-              <input type="text" id="custName" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              <label class="field-label">Customer Name *</label>
+              <input type="text" id="custName" required class="field-input">
             </div>
 
             <div>
-              <label class="block text-xs text-slate-400 mb-1">Phone / WhatsApp *</label>
-              <input type="text" id="custPhone" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              <label class="field-label">Phone / WhatsApp *</label>
+              <input type="text" id="custPhone" required class="field-input">
             </div>
 
             <div>
-              <label class="block text-xs text-slate-400 mb-1">Inquiry Source *</label>
-              <select id="custSource" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              <label class="field-label">Inquiry Source *</label>
+              <select id="custSource" required class="field-input">
                 <option value="WhatsApp">WhatsApp</option>
                 <option value="Phone Call">Phone Call</option>
                 <option value="Email">Email</option>
@@ -231,28 +204,25 @@
             </div>
 
             <div>
-              <label class="block text-xs text-slate-400 mb-1">Inquiry Details *</label>
-              <input type="text" id="custDetails" placeholder="e.g. Sliding Gate, Burglar Bars" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              <label class="field-label">Inquiry Details *</label>
+              <input type="text" id="custDetails" placeholder="e.g. Sliding Gate, Burglar Bars" required class="field-input">
             </div>
 
             <div>
-              <label class="block text-xs text-slate-400 mb-1">Follow-Up Date *</label>
-              <input type="date" id="custFollowUp" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+              <label class="field-label">Follow-Up Date *</label>
+              <input type="date" id="custFollowUp" required class="field-input">
             </div>
 
             <div class="flex items-end">
-              <button type="submit" class="w-full py-2 bg-crimson hover:bg-crimson-dark text-white font-semibold rounded-lg text-sm transition shadow">
-                Save Inquiry
-              </button>
+              <button type="submit" class="btn btn-crimson w-full">Save Inquiry</button>
             </div>
           </form>
         </div>
 
-        <!-- TABLE -->
-        <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow">
-          <div class="p-4 bg-slate-800 border-b border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-200">Logged Inquiries</h2>
-            <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Search..." class="w-full md:w-64 px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200">
+        <div class="panel overflow-hidden">
+          <div class="p-4 border-b border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h2 class="section-title w-full md:w-auto">Logged Inquiries</h2>
+            <input type="text" id="searchInput" onkeyup="renderTable()" placeholder="Search..." class="field-input md:w-64">
           </div>
 
           <div class="overflow-x-auto">
@@ -273,25 +243,22 @@
         </div>
       </div>
 
-      <!-- TAB 2: QUOTATIONS & ESTIMATES -->
+      <!-- QUOTATIONS -->
       <div id="quotationsTab" class="app-tab-page hidden space-y-6">
-        <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow">
+        <div class="panel p-5">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-700 pb-4 mb-4 gap-3">
             <div>
-              <h2 class="text-sm font-bold uppercase tracking-wider text-rose-400">Create Custom Metal Fabrication Quotation</h2>
+              <h2 class="section-title">Create Custom Metal Fabrication Quotation</h2>
               <p class="text-xs text-slate-400">Build custom or non-standard job estimates with flexible variables.</p>
             </div>
-            
-            <!-- CLIENT TYPE SELECTION MODE -->
+
             <div class="flex items-center gap-3 bg-slate-900 p-2 rounded-lg border border-slate-700 text-xs">
               <span class="font-bold text-slate-300">Client Type:</span>
-              <label class="flex items-center gap-1 text-slate-300 cursor-pointer">
-                <input type="radio" name="clientType" value="existing" checked onchange="toggleClientTypeMode()" class="text-rose-500">
-                Existing Inquiry
+              <label class="flex items-center gap-1 text-slate-300">
+                <input type="radio" name="clientType" value="existing" checked onchange="toggleClientTypeMode()"> Existing Inquiry
               </label>
-              <label class="flex items-center gap-1 text-slate-300 cursor-pointer">
-                <input type="radio" name="clientType" value="new" onchange="toggleClientTypeMode()" class="text-rose-500">
-                New Client (+Auto Save)
+              <label class="flex items-center gap-1 text-slate-300">
+                <input type="radio" name="clientType" value="new" onchange="toggleClientTypeMode()"> New Client (+Auto Save)
               </label>
             </div>
           </div>
@@ -299,44 +266,322 @@
           <form id="quoteForm" onsubmit="handleSaveQuote(event)" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label class="block text-xs text-slate-400 mb-1">Quotation Ref #</label>
-                <input type="text" id="quoteRef" readonly class="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-lg text-xs font-mono text-rose-400 font-bold">
+                <label class="field-label">Quotation Ref #</label>
+                <input type="text" id="quoteRef" readonly class="field-input">
               </div>
 
-              <!-- EXISTING CLIENT DROPDOWN -->
               <div id="existingClientContainer">
-                <label class="block text-xs text-slate-400 mb-1">Select Existing Client / Inquiry *</label>
-                <select id="quoteInquirySelector" onchange="autoFillFromInquiry()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-rose-500">
+                <label class="field-label">Select Existing Client / Inquiry *</label>
+                <select id="quoteInquirySelector" onchange="autoFillFromInquiry()" class="field-input">
                   <option value="">-- Select Registered Client --</option>
                 </select>
               </div>
 
-              <!-- NEW CLIENT INPUTS (Dynamic) -->
               <div id="newClientNameContainer" class="hidden">
-                <label class="block text-xs text-slate-400 mb-1">New Client Full Name *</label>
-                <input type="text" id="quoteClientName" class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200" placeholder="e.g. John Moyo">
+                <label class="field-label">New Client Full Name *</label>
+                <input type="text" id="quoteClientName" class="field-input" placeholder="e.g. John Moyo">
               </div>
 
               <div>
-                <label class="block text-xs text-slate-400 mb-1">Phone / WhatsApp Number *</label>
-                <input type="text" id="quoteClientPhone" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+                <label class="field-label">Phone / WhatsApp Number *</label>
+                <input type="text" id="quoteClientPhone" required class="field-input">
               </div>
 
               <div class="md:col-span-2">
-                <label class="block text-xs text-slate-400 mb-1">Custom Product / Service Scope Description *</label>
-                <input type="text" id="quoteSubject" placeholder="e.g. 4m Motorized Sliding Gate, Heavy Duty Hinges & Red Oxide Finish" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+                <label class="field-label">Custom Product / Service Scope Description *</label>
+                <input type="text" id="quoteSubject" placeholder="e.g. 4m Motorized Sliding Gate..." required class="field-input">
               </div>
 
               <div>
-                <label class="block text-xs text-slate-400 mb-1">Quote Date</label>
-                <input type="date" id="quoteDate" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-sm text-slate-200">
+                <label class="field-label">Quote Date</label>
+                <input type="date" id="quoteDate" required class="field-input">
+              </div>
+            </div>
+
+            <!-- PAYMENT TERMS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Payment Terms Preset *</label>
+                <select id="quoteTermsPreset" onchange="handlePaymentTermsPreset()" class="field-input">
+                  <option value="deposit_20">20% Deposit / 80% Balance on Completion</option>
+                  <option value="deposit_30">30% Deposit / 70% Balance on Completion</option>
+                  <option value="deposit_40">40% Deposit / 60% Balance on Completion</option>
+                  <option value="deposit_50">50% Deposit / 50% Balance on Completion</option>
+                  <option value="deposit_60">60% Deposit / 40% Balance on Completion</option>
+                  <option value="deposit_75">75% Deposit / 25% Balance on Completion</option>
+                  <option value="payment_delivery">Payment on Delivery / Completion</option>
+                  <option value="credit_7">Credit Terms: 7 Days</option>
+                  <option value="credit_14">Credit Terms: 14 Days</option>
+                  <option value="credit_30">Credit Terms: 30 Days</option>
+                  <option value="credit_45">Credit Terms: 45 Days</option>
+                  <option value="credit_60">Credit Terms: 60 Days</option>
+                  <option value="custom">Custom Payment Terms</option>
+                </select>
               </div>
 
-              <!-- CUSTOM PAYMENT TERMS PER JOB / CLIENT -->
-              <div class="md:col-span-3">
-                <label class="block text-xs text-slate-400 mb-1">Payment Terms & Deposit Structure (Job/Client Specific) *</label>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <select id="quoteTermsPreset" onchange="handlePaymentTermsPreset()" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-xs text-slate-200">
-                    <option value="deposit_20">20% Deposit (80% Balance on Completion)</option>
-                    <option value="deposit_30">30% Deposit (70% Balance on Completion)</option>
-                    <option value="deposit_40">40% Deposit (60% Balance on Completion)</option>
+              <div>
+                <label class="field-label">Payment Terms (Dynamic Text)</label>
+                <input type="text" id="paymentTermsText" class="field-input" placeholder="e.g. 40% deposit, balance due upon completion and prior to installation">
+              </div>
+            </div>
+
+            <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex flex-wrap items-center gap-2">
+              <span class="text-xs font-bold text-slate-400 uppercase mr-1">Quick Custom Item Templates:</span>
+              <button type="button" onclick="addQuoteRow('Mild Steel RHS Tubing (Custom Size)', '6m Length', 45)" class="mini-btn">+ Custom Steel Section</button>
+              <button type="button" onclick="addQuoteRow('Structural MIG/TIG Welding Labor (Custom Scope)', 'Hours', 25)" class="mini-btn">+ Specialized Labor</button>
+              <button type="button" onclick="addQuoteRow('Red Oxide Primer & Custom Spray Coating', 'Sq Meters', 12)" class="mini-btn">+ Surface Coating</button>
+              <button type="button" onclick="addQuoteRow('Specialized Heavy Duty Hardware / Locks', 'Set', 35)" class="mini-btn">+ Custom Hardware</button>
+              <button type="button" onclick="addQuoteRow('Site Transport & Installation (Custom Site Location)', 'Lot', 120)" class="mini-btn">+ Transport & Installation</button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-900 text-slate-400 uppercase font-semibold border-b border-slate-700">
+                  <tr>
+                    <th class="p-2.5 w-5/12">Product / Service Description</th>
+                    <th class="p-2.5 w-2/12">Unit</th>
+                    <th class="p-2.5 w-1/12 text-center">Qty</th>
+                    <th class="p-2.5 w-2/12 text-right">Unit Price ($)</th>
+                    <th class="p-2.5 w-2/12 text-right">Line Total ($)</th>
+                    <th class="p-2.5 w-1/12 text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="quoteLineItemsBody" class="divide-y divide-slate-700/50"></tbody>
+              </table>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+              <button type="button" onclick="addQuoteRow('', 'Job / Item', 0)" class="btn btn-slate">
+                + Add Custom Variable Item Row
+              </button>
+
+              <div class="w-full md:w-72 bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-2 text-xs">
+                <div class="flex justify-between text-slate-400">
+                  <span>Subtotal:</span>
+                  <span id="quoteSubtotal" class="font-bold text-slate-200">$0.00</span>
+                </div>
+                <div class="flex justify-between text-slate-400">
+                  <span>VAT (15%):</span>
+                  <span id="quoteVat" class="font-bold text-slate-200">$0.00</span>
+                </div>
+                <div class="border-t border-slate-700 pt-2 flex justify-between font-bold text-sm text-white">
+                  <span>Grand Total:</span>
+                  <span id="quoteGrandTotal" class="text-emerald-400">$0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button type="submit" class="btn btn-crimson">
+                Save & Issue Custom Quotation
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- QUOTATIONS TABLE -->
+        <div class="panel overflow-hidden">
+          <div class="p-4 border-b border-slate-700">
+            <h2 class="section-title">Issued Quotations & Order Conversion</h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900 text-xs text-slate-400 uppercase font-semibold border-b border-slate-700">
+                <tr>
+                  <th class="p-3">Ref #</th>
+                  <th class="p-3">Client</th>
+                  <th class="p-3">Subject</th>
+                  <th class="p-3">Total Amount</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="quotationsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVOICES -->
+      <div id="invoicesTab" class="app-tab-page hidden space-y-6">
+        <div class="panel overflow-hidden">
+          <div class="p-4 border-b border-slate-700">
+            <h2 class="section-title">Tax Invoices & Payment Ledger</h2>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900 text-xs text-slate-400 uppercase font-semibold border-b border-slate-700">
+                <tr>
+                  <th class="p-3">Invoice #</th>
+                  <th class="p-3">Client</th>
+                  <th class="p-3">Total Amount</th>
+                  <th class="p-3">Payment Status</th>
+                  <th class="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="invoicesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-slate-900 py-3 text-center text-xs text-slate-500 border-t border-slate-800">
+      Developed by Asfalis Group 2026 | Phone: +263 772 911 806
+    </footer>
+  </div>
+
+  <!-- USER MANAGEMENT MODAL -->
+  <div id="userModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm hidden">
+    <div class="bg-slate-800 text-slate-100 rounded-2xl shadow-2xl w-full max-w-2xl p-6 border border-slate-700 m-4">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-700">
+        <h3 class="text-lg font-bold text-white">Team User & Account Settings</h3>
+        <button onclick="closeUserModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <div class="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+        <form id="addUserForm" onsubmit="handleAddUser(event)" class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
+          <h4 class="text-xs font-bold text-rose-400 uppercase">Add New Team Account</h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <input type="text" id="newUserEmail" placeholder="Email / Username" required class="field-input">
+            <input type="password" id="newUserPassword" placeholder="Password" required class="field-input">
+            <select id="newUserRole" class="field-input">
+              <option value="Staff">Staff</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-crimson w-full">Create Account</button>
+        </form>
+
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-slate-400 uppercase">Registered Accounts & Credentials Management</h4>
+          <div id="userList" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DOC PREVIEW MODAL -->
+  <div id="printDocModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden overflow-y-auto">
+    <div class="bg-white text-slate-900 rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden my-8">
+      <div class="bg-slate-900 text-white p-4 flex justify-between items-center no-print">
+        <h3 id="printModalTitle" class="text-sm font-bold">Document Preview</h3>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="btn btn-crimson text-xs">
+            Print / Save PDF
+          </button>
+          <button onclick="closePrintModal()" class="text-slate-400 hover:text-white text-xl font-bold px-2">&times;</button>
+        </div>
+      </div>
+
+      <div id="printableDocument" class="p-8 bg-white text-slate-900 text-xs">
+        <div class="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
+          <div>
+            <h1 class="text-xl font-black text-slate-900 tracking-tight">PACK GROUND INVESTMENTS</h1>
+            <p class="text-[11px] font-bold text-rose-800 uppercase tracking-widest mt-0.5">Metal Fabrication & Structural Steel Specialists</p>
+            <p class="text-[11px] text-slate-500 mt-1">46 Caledon Avenue, Hatfield, Harare, Zimbabwe</p>
+            <p class="text-[11px] text-slate-500">Phone: +263 242 586 658 // +263 718 864 757</p>
+          </div>
+          <div class="text-right">
+            <span id="docTypeLabel" class="inline-block bg-slate-900 text-white font-bold px-3 py-1 rounded text-xs uppercase tracking-wider mb-2">QUOTATION</span>
+            <p id="docNumberText" class="font-bold text-sm text-slate-800">#PGI-QT-1001</p>
+            <p id="docDateText" class="text-slate-500">Date: 2026-11-09</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
+          <div>
+            <p class="font-bold text-slate-400 uppercase text-[10px]">Client / Billed To:</p>
+            <p id="docClientName" class="font-bold text-slate-900 text-sm mt-0.5">Client Name</p>
+            <p id="docClientPhone" class="text-slate-600">Contact Details</p>
+          </div>
+          <div>
+            <p class="font-bold text-slate-400 uppercase text-[10px]">Fabrication Subject:</p>
+            <p id="docSubjectText" class="font-semibold text-slate-800 mt-0.5">Steel Fabrication Works</p>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <p class="font-bold text-slate-500 uppercase text-[10px]">Payment Terms:</p>
+          <p id="docPaymentTerms" class="text-slate-800 text-xs mt-1">Payment Terms</p>
+        </div>
+
+        <table class="w-full text-left border-collapse border border-slate-200 mb-6 text-xs">
+          <thead class="bg-slate-900 text-white uppercase font-bold text-[10px]">
+            <tr>
+              <th class="p-2.5">Item Description</th>
+              <th class="p-2.5">Unit</th>
+              <th class="p-2.5 text-center">Qty</th>
+              <th class="p-2.5 text-right">Unit Price</th>
+              <th class="p-2.5 text-right">Total ($)</th>
+            </tr>
+          </thead>
+          <tbody id="docItemsBody"></tbody>
+        </table>
+
+        <div class="flex justify-end mb-8">
+          <div class="w-64 space-y-1.5 text-xs bg-slate-50 p-3 rounded border border-slate-200">
+            <div class="flex justify-between text-slate-600">
+              <span>Subtotal:</span>
+              <span id="docSubtotal" class="font-bold text-slate-800">$0.00</span>
+            </div>
+            <div class="flex justify-between text-slate-600">
+              <span>VAT (15%):</span>
+              <span id="docVat" class="font-bold text-slate-800">$0.00</span>
+            </div>
+            <div class="border-t border-slate-800 pt-1.5 flex justify-between font-bold text-sm text-slate-900">
+              <span>Grand Total:</span>
+              <span id="docGrandTotal" class="text-rose-800">$0.00</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-200 pt-6 text-[10px] text-slate-500 flex justify-between items-end">
+          <div>
+            <p class="font-bold text-slate-700 uppercase">Payment Terms & Instructions:</p>
+            <p>1. 50% Upfront deposit to confirm order and commence shop fabrication.</p>
+            <p>2. 40% Payable upon completion of metalwork prior to dispatch.</p>
+            <p>3. 10% Final balance upon installation & client sign-off.</p>
+          </div>
+          <div class="text-center w-40 border-t border-slate-400 pt-1">
+            <p class="font-bold text-slate-800">Authorized Signature</p>
+            <p class="text-[9px] text-slate-400">PACK Ground Investments</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS MODAL -->
+  <div id="analyticsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 hidden overflow-y-auto">
+    <div class="bg-slate-800 text-slate-100 rounded-2xl shadow-2xl w-full max-w-4xl p-6 border border-slate-700 m-4 space-y-6">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+        <div>
+          <h3 class="text-lg font-bold text-white">PACK Ground Operations - Visual Analytics Dashboard</h3>
+          <p class="text-xs text-slate-400">Graphical summary of multi-channel inquiries, quote conversions & revenue pipeline.</p>
+        </div>
+        <button onclick="closeAnalyticsModal()" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col items-center">
+          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3 text-center">Inquiry Pipeline Status</h4>
+          <div id="chartStatusContainer" class="w-full flex justify-center items-center h-48"></div>
+        </div>
+
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col items-center">
+          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3 text-center">Inquiry Lead Sources</h4>
+          <div id="chartSourceContainer" class="w-full flex justify-center items-center h-48"></div>
+        </div>
+
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 flex flex-col items-center">
+          <h4 class="text-xs font-bold text-slate-300 uppercase mb-3 text-center">Quotations vs. Invoiced Revenue</h4>
+          <div id="chartFinancialContainer" class="w-full flex justify-center items-center h-48"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
