@@ -4,7 +4,7 @@
  */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBwLjWo5yY4YRY5noKQZqhTiNLB8PYcTLo",
+  apiKey: "AIzaSyDpP1K2J5K6EJQUgF9BETI_fAuROlRemp4",
   authDomain: "pack-ground-tracker.firebaseapp.com",
   projectId: "pack-ground-tracker",
   storageBucket: "pack-ground-tracker.appspot.com",
